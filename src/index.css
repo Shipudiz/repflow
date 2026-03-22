@@ -1,0 +1,127 @@
+@import "tailwindcss";
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+  /* iOS Safari viewport fix */
+  height: -webkit-fill-available;
+}
+
+body {
+  background: #0a0a0a;
+  color: #f0f0f0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior: none;
+  overflow: hidden;
+  height: 100dvh;
+  min-height: -webkit-fill-available;
+}
+
+#root {
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  max-width: 430px;
+  margin: 0 auto;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Scrollable content area — safe area insets built in */
+.scroll-area {
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  /* Top: notch-safe + breathing room */
+  padding-top: max(52px, calc(env(safe-area-inset-top) + 16px));
+  /* Bottom: room for nav bar */
+  padding-bottom: 120px;
+}
+.scroll-area::-webkit-scrollbar { display: none; }
+
+/* ── Kegel glow tremble — simulates muscle tension ─────────────────── */
+@keyframes kegel-tremble {
+  0%   { transform: scale(1.00); }
+  10%  { transform: scale(1.015) rotate(0.3deg); }
+  20%  { transform: scale(0.99) rotate(-0.2deg); }
+  30%  { transform: scale(1.02) rotate(0.1deg); }
+  40%  { transform: scale(0.985) rotate(-0.3deg); }
+  50%  { transform: scale(1.01) rotate(0.2deg); }
+  60%  { transform: scale(0.995) rotate(-0.1deg); }
+  70%  { transform: scale(1.018) rotate(0.15deg); }
+  80%  { transform: scale(0.992) rotate(-0.2deg); }
+  90%  { transform: scale(1.008) rotate(0.1deg); }
+  100% { transform: scale(1.00); }
+}
+.kegel-tremble { animation: kegel-tremble 0.8s ease-in-out infinite; }
+
+/* ── Stick figure animations ──────────────────────────────────────────── */
+@keyframes crunch {
+  0%,100% { transform: rotate(0deg);   transform-origin: bottom center; }
+  50%     { transform: rotate(-40deg); transform-origin: bottom center; }
+}
+@keyframes leg-raise {
+  0%,100% { transform: rotate(0deg);   transform-origin: top center; }
+  50%     { transform: rotate(-80deg); transform-origin: top center; }
+}
+@keyframes flutter-l {
+  0%,100% { transform: translateY(0px); }
+  50%     { transform: translateY(-12px); }
+}
+@keyframes flutter-r {
+  0%     { transform: translateY(-12px); }
+  50%    { transform: translateY(0px); }
+  100%   { transform: translateY(-12px); }
+}
+@keyframes twist {
+  0%,100% { transform: rotate(-30deg); }
+  50%     { transform: rotate(30deg); }
+}
+@keyframes plank-knee {
+  0%,100% { transform: translateX(0); }
+  50%     { transform: translateX(-18px); }
+}
+@keyframes side-dip {
+  0%,100% { transform: translateY(0); }
+  50%     { transform: translateY(10px); }
+}
+@keyframes scissors-l {
+  0%,100% { transform: rotate(-20deg); }
+  50%     { transform: rotate(20deg); }
+}
+@keyframes scissors-r {
+  0%    { transform: rotate(20deg); }
+  50%   { transform: rotate(-20deg); }
+  100%  { transform: rotate(20deg); }
+}
+@keyframes mountain-climber {
+  0%,100% { transform: translateX(0); }
+  50%     { transform: translateX(-16px); }
+}
+@keyframes bicycle {
+  0%   { transform: rotate(-40deg); }
+  25%  { transform: rotate(0deg); }
+  50%  { transform: rotate(40deg); }
+  75%  { transform: rotate(0deg); }
+  100% { transform: rotate(-40deg); }
+}
+@keyframes float {
+  0%,100% { transform: translateY(0px); }
+  50%     { transform: translateY(-6px); }
+}
+
+.animate-crunch         { animation: crunch          2s   ease-in-out infinite; }
+.animate-leg-raise      { animation: leg-raise       2s   ease-in-out infinite; }
+.animate-flutter-l      { animation: flutter-l       0.6s ease-in-out infinite; }
+.animate-flutter-r      { animation: flutter-r       0.6s ease-in-out infinite; }
+.animate-twist          { animation: twist           1.5s ease-in-out infinite; }
+.animate-plank-knee     { animation: plank-knee      1s   ease-in-out infinite; }
+.animate-side-dip       { animation: side-dip        1.2s ease-in-out infinite; }
+.animate-scissors-l     { animation: scissors-l      0.8s ease-in-out infinite; }
+.animate-scissors-r     { animation: scissors-r      0.8s ease-in-out infinite; }
+.animate-mountain       { animation: mountain-climber 0.7s ease-in-out infinite; }
+.animate-bicycle        { animation: bicycle         1.2s ease-in-out infinite; }
+.animate-float          { animation: float           2s   ease-in-out infinite; }
