@@ -95,73 +95,178 @@ body {
   100% { transform: translateX(200%); }
 }
 
-/* ── Stick figure animations ──────────────────────────────────────────── */
+/* ── Stick figure animations (v2 — improved multi-step keyframes) ──── */
+
+/* Crunch: smooth curl up, brief hold, controlled lower */
 @keyframes crunch {
-  0%,100% { transform: rotate(0deg);   transform-origin: bottom center; }
-  50%     { transform: rotate(-40deg); transform-origin: bottom center; }
-}
-@keyframes leg-raise {
-  0%,100% { transform: rotate(0deg);   transform-origin: top center; }
-  50%     { transform: rotate(-80deg); transform-origin: top center; }
-}
-@keyframes flutter-l {
-  0%,100% { transform: translateY(0px); }
-  50%     { transform: translateY(-12px); }
-}
-@keyframes flutter-r {
-  0%     { transform: translateY(-12px); }
-  50%    { transform: translateY(0px); }
-  100%   { transform: translateY(-12px); }
-}
-@keyframes twist {
-  0%,100% { transform: rotate(-30deg); }
-  50%     { transform: rotate(30deg); }
-}
-@keyframes plank-knee {
-  0%,100% { transform: translateX(0); }
-  50%     { transform: translateX(-18px); }
-}
-@keyframes side-dip {
-  0%,100% { transform: translateY(0); }
-  50%     { transform: translateY(10px); }
-}
-@keyframes scissors-l {
-  0%,100% { transform: rotate(-20deg); }
-  50%     { transform: rotate(20deg); }
-}
-@keyframes scissors-r {
-  0%    { transform: rotate(20deg); }
-  50%   { transform: rotate(-20deg); }
-  100%  { transform: rotate(20deg); }
-}
-@keyframes mountain-climber {
-  0%,100% { transform: translateX(0); }
-  50%     { transform: translateX(-16px); }
-}
-@keyframes bicycle {
-  0%   { transform: rotate(-40deg); }
-  25%  { transform: rotate(0deg); }
-  50%  { transform: rotate(40deg); }
-  75%  { transform: rotate(0deg); }
-  100% { transform: rotate(-40deg); }
-}
-@keyframes float {
-  0%,100% { transform: translateY(0px); }
-  50%     { transform: translateY(-6px); }
+  0%, 100% { transform: rotate(0deg); }
+  35%      { transform: rotate(-35deg); }
+  50%      { transform: rotate(-38deg); }
+  65%      { transform: rotate(-35deg); }
 }
 
-.animate-crunch         { animation: crunch          2s   ease-in-out infinite; }
-.animate-leg-raise      { animation: leg-raise       2s   ease-in-out infinite; }
-.animate-flutter-l      { animation: flutter-l       0.6s ease-in-out infinite; }
-.animate-flutter-r      { animation: flutter-r       0.6s ease-in-out infinite; }
-.animate-twist          { animation: twist           1.5s ease-in-out infinite; }
-.animate-plank-knee     { animation: plank-knee      1s   ease-in-out infinite; }
-.animate-side-dip       { animation: side-dip        1.2s ease-in-out infinite; }
-.animate-scissors-l     { animation: scissors-l      0.8s ease-in-out infinite; }
-.animate-scissors-r     { animation: scissors-r      0.8s ease-in-out infinite; }
-.animate-mountain       { animation: mountain-climber 0.7s ease-in-out infinite; }
-.animate-bicycle        { animation: bicycle         1.2s ease-in-out infinite; }
-.animate-float          { animation: float           2s   ease-in-out infinite; }
+/* Leg raise: controlled lift, brief pause at top, slow lower */
+@keyframes leg-raise {
+  0%, 100% { transform: rotate(0deg); }
+  40%      { transform: rotate(-75deg); }
+  55%      { transform: rotate(-78deg); }
+  70%      { transform: rotate(-75deg); }
+}
+
+/* Flutter kicks: alternating, slightly offset */
+@keyframes flutter-l {
+  0%, 100% { transform: translateY(0px); }
+  50%      { transform: translateY(-14px); }
+}
+@keyframes flutter-r {
+  0%       { transform: translateY(-14px); }
+  50%      { transform: translateY(0px); }
+  100%     { transform: translateY(-14px); }
+}
+
+/* Twist: smooth rotation with slight ease at ends */
+@keyframes twist {
+  0%, 100% { transform: rotate(-28deg); }
+  50%      { transform: rotate(28deg); }
+}
+
+/* Plank knee: drive forward, snap back */
+@keyframes plank-knee-l {
+  0%, 100% { transform: translateX(0) translateY(0); }
+  40%      { transform: translateX(-20px) translateY(-6px); }
+  55%      { transform: translateX(-22px) translateY(-7px); }
+}
+@keyframes plank-knee-r {
+  0%, 100% { transform: translateX(0) translateY(0); }
+  40%      { transform: translateX(-20px) translateY(-6px); }
+  55%      { transform: translateX(-22px) translateY(-7px); }
+}
+
+/* Side plank dip: controlled drop and lift */
+@keyframes side-dip {
+  0%, 100% { transform: translateY(0); }
+  45%      { transform: translateY(12px); }
+  55%      { transform: translateY(12px); }
+}
+
+/* Scissors: crossing legs */
+@keyframes scissors-l {
+  0%, 100% { transform: rotate(-18deg); }
+  50%      { transform: rotate(18deg); }
+}
+@keyframes scissors-r {
+  0%       { transform: rotate(18deg); }
+  50%      { transform: rotate(-18deg); }
+  100%     { transform: rotate(18deg); }
+}
+
+/* Mountain climber: quick knee drive */
+@keyframes mountain-l {
+  0%, 100% { transform: translateX(0) translateY(0); }
+  35%      { transform: translateX(-22px) translateY(-8px); }
+  50%      { transform: translateX(-24px) translateY(-8px); }
+}
+@keyframes mountain-r {
+  0%, 50%  { transform: translateX(0) translateY(0); }
+  85%      { transform: translateX(-22px) translateY(-8px); }
+  100%     { transform: translateX(0) translateY(0); }
+}
+
+/* Bicycle pedal: smooth circular-ish motion */
+@keyframes bicycle-l {
+  0%       { transform: rotate(-40deg); }
+  25%      { transform: rotate(0deg); }
+  50%      { transform: rotate(40deg); }
+  75%      { transform: rotate(0deg); }
+  100%     { transform: rotate(-40deg); }
+}
+@keyframes bicycle-r {
+  0%       { transform: rotate(40deg); }
+  25%      { transform: rotate(0deg); }
+  50%      { transform: rotate(-40deg); }
+  75%      { transform: rotate(0deg); }
+  100%     { transform: rotate(40deg); }
+}
+
+/* Hollow body: gentle float/pulse */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50%      { transform: translateY(-5px); }
+}
+
+/* Leg circle: smooth rotation */
+@keyframes spin-slow {
+  0%       { transform: rotate(0deg); }
+  100%     { transform: rotate(360deg); }
+}
+
+/* Heel tap: lateral reach */
+@keyframes heel-reach {
+  0%, 100% { transform: translateX(0); }
+  25%      { transform: translateX(-12px); }
+  75%      { transform: translateX(12px); }
+}
+
+/* Extend-tuck: legs extend and pull back */
+@keyframes extend-tuck {
+  0%, 100% { transform: rotate(-60deg); }
+  50%      { transform: rotate(0deg); }
+}
+
+/* Spider: knee drives to side */
+@keyframes spider-knee {
+  0%, 100% { transform: rotate(0deg) translateX(0); }
+  40%      { transform: rotate(35deg) translateX(-10px); }
+  55%      { transform: rotate(38deg) translateX(-10px); }
+}
+
+/* Butterfly: crunch up with elbows wide */
+@keyframes butterfly-crunch {
+  0%, 100% { transform: rotate(0deg); }
+  40%      { transform: rotate(-30deg); }
+  55%      { transform: rotate(-32deg); }
+}
+
+/* Reverse crunch: hips curl up */
+@keyframes reverse-curl {
+  0%, 100% { transform: rotate(0deg); }
+  40%      { transform: rotate(-65deg); }
+  55%      { transform: rotate(-68deg); }
+}
+
+/* Cross crunch: diagonal twist */
+@keyframes cross-crunch-l {
+  0%, 100% { transform: rotate(0deg) skewX(0deg); }
+  50%      { transform: rotate(-35deg) skewX(-8deg); }
+}
+@keyframes cross-crunch-r {
+  0%, 100% { transform: rotate(0deg) skewX(0deg); }
+  50%      { transform: rotate(-35deg) skewX(8deg); }
+}
+
+.anim-crunch        { animation: crunch          2s   cubic-bezier(0.4, 0, 0.2, 1) infinite; }
+.anim-leg-raise     { animation: leg-raise       2.4s cubic-bezier(0.4, 0, 0.2, 1) infinite; }
+.anim-flutter-l     { animation: flutter-l       0.6s ease-in-out infinite; }
+.anim-flutter-r     { animation: flutter-r       0.6s ease-in-out infinite; }
+.anim-twist         { animation: twist           1.6s cubic-bezier(0.4, 0, 0.2, 1) infinite; }
+.anim-plank-knee-l  { animation: plank-knee-l    1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite; }
+.anim-plank-knee-r  { animation: plank-knee-r    1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite 0.6s; }
+.anim-side-dip      { animation: side-dip        1.4s cubic-bezier(0.4, 0, 0.2, 1) infinite; }
+.anim-scissors-l    { animation: scissors-l      0.9s ease-in-out infinite; }
+.anim-scissors-r    { animation: scissors-r      0.9s ease-in-out infinite; }
+.anim-mountain-l    { animation: mountain-l      0.8s cubic-bezier(0.4, 0, 0.2, 1) infinite; }
+.anim-mountain-r    { animation: mountain-r      0.8s cubic-bezier(0.4, 0, 0.2, 1) infinite; }
+.anim-bicycle-l     { animation: bicycle-l       1.4s ease-in-out infinite; }
+.anim-bicycle-r     { animation: bicycle-r       1.4s ease-in-out infinite; }
+.anim-float         { animation: float           2.5s ease-in-out infinite; }
+.anim-spin-slow     { animation: spin-slow       3s   linear infinite; }
+.anim-heel-reach    { animation: heel-reach      1.4s cubic-bezier(0.4, 0, 0.2, 1) infinite; }
+.anim-extend-tuck   { animation: extend-tuck     2s   cubic-bezier(0.4, 0, 0.2, 1) infinite; }
+.anim-spider        { animation: spider-knee     1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite; }
+.anim-butterfly     { animation: butterfly-crunch 2s  cubic-bezier(0.4, 0, 0.2, 1) infinite; }
+.anim-reverse-curl  { animation: reverse-curl    2.2s cubic-bezier(0.4, 0, 0.2, 1) infinite; }
+.anim-cross-l       { animation: cross-crunch-l  2s   cubic-bezier(0.4, 0, 0.2, 1) infinite; }
+.anim-cross-r       { animation: cross-crunch-r  2s   cubic-bezier(0.4, 0, 0.2, 1) infinite; }
 
 /* ── Accessibility: Respect reduced motion preference ─────────────── */
 @media (prefers-reduced-motion: reduce) {
