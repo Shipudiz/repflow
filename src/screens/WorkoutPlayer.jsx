@@ -18,8 +18,9 @@ export default function WorkoutPlayer({ workout, onClose, onComplete }) {
   const current = exercises[exIdx]
   const nextEx = exercises[exIdx + 1] || null
   const isLastEx = exIdx === exercises.length - 1
-  const workSec = workout.workSec
-  const restSec = workout.restSec
+  // Per-exercise workSec override (for mixed-timing workouts like Daily Routine)
+  const workSec = current?.workSec || workout.workSec
+  const restSec = current?.restSec ?? workout.restSec
 
   const duration = phase === PHASE.COUNTDOWN ? 3
     : phase === PHASE.WORK ? workSec
@@ -44,7 +45,7 @@ export default function WorkoutPlayer({ workout, onClose, onComplete }) {
 
   // Advance logic
   const stateRef = useRef({})
-  stateRef.current = { phase, exIdx, isLastEx, workSec, restSec, workout, totalElapsed }
+  stateRef.current = { phase, exIdx, isLastEx, workout, totalElapsed }
 
   const advance = useCallback(() => {
     const s = stateRef.current

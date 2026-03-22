@@ -206,7 +206,8 @@ export default function Home({ settings, onStartWorkout, onStartKegel, onNavigat
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           {WORKOUTS.map((w, i) => {
             const done = todayWorkouts.some(d => d.workoutId === w.id)
-            const totalSec = w.exercises.length * (w.workSec + w.restSec)
+            const totalSec = w.exercises.reduce((sum, ex) =>
+              sum + (ex.workSec || w.workSec) + (ex.restSec ?? w.restSec), 0)
             const mins = Math.ceil(totalSec / 60)
             return (
               <motion.button key={w.id} {...fadeUp(0.2 + i * 0.05)}

@@ -20,7 +20,8 @@ export default function Programs({ onStartWorkout, settings }) {
       <div className="flex flex-col gap-4">
         {WORKOUTS.map((w, i) => {
           const done = todayWorkouts.some(d => d.workoutId === w.id)
-          const totalSec = w.exercises.length * (w.workSec + w.restSec)
+          const totalSec = w.exercises.reduce((sum, ex) =>
+            sum + (ex.workSec || w.workSec) + (ex.restSec ?? w.restSec), 0)
           const mins = Math.ceil(totalSec / 60)
 
           return (
@@ -114,7 +115,7 @@ export default function Programs({ onStartWorkout, settings }) {
                             <p className="text-sm font-medium" style={{ color: '#e5e7eb' }}>{ex.name}</p>
                             <p className="text-xs" style={{ color: '#4b5563' }}>{ex.cue}</p>
                           </div>
-                          <span className="text-xs font-mono" style={{ color: '#374151' }}>{w.workSec}s</span>
+                          <span className="text-xs font-mono" style={{ color: '#374151' }}>{ex.workSec || w.workSec}s</span>
                         </motion.div>
                       ))}
 

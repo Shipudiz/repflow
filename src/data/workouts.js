@@ -62,6 +62,64 @@ export const WORKOUTS = [
       { id: 'spider-crunches',      name: 'Spider Crunches',            anim: 'spider',         cue: 'Knee to same-side elbow' },
     ]
   },
+
+  // ─── WORKOUT 3: Daily Routine — mixed 30s / 60s ────────────────────────────
+  {
+    id: 'daily-routine',
+    title: 'Daily Routine',
+    subtitle: 'Mobility & flow · no rest',
+    emoji: '🌅',
+    color: '#10b981',       // emerald
+    glow: 'rgba(16,185,129,0.3)',
+    workSec: 30,            // default — overridden per exercise
+    restSec: 0,
+    type: 'timed',
+    exercises: [
+      // — 30 sec block —
+      { id: 'hopping-around',    name: 'Hopping Around',       anim: 'hopping',        cue: 'Light bouncy hops, stay loose',       workSec: 30 },
+      { id: 'lymphatic-hops',    name: 'Lymphatic Hops',       anim: 'lymphatic-hops', cue: 'Gentle heel bounces, arms relaxed',   workSec: 30 },
+      { id: 'whipping-arms',     name: 'Whipping Arms Release',anim: 'whipping-arms',  cue: 'Let arms flop freely, shake it out',  workSec: 30 },
+      { id: 'heart-openers',     name: 'Heart Openers',        anim: 'heart-openers',  cue: 'Open chest wide, squeeze shoulder blades', workSec: 30 },
+      // — 1 min block —
+      { id: 'arm-swings',        name: 'Arm Swings',           anim: 'arm-swings',     cue: 'Big forward & backward circles',      workSec: 60 },
+      { id: 'spinal-waves',      name: 'Spinal Waves',         anim: 'spinal-waves',   cue: 'Roll through each vertebra slowly',   workSec: 60 },
+      { id: 'dead-arms',         name: 'Dead Arms',            anim: 'dead-arms',      cue: 'Twist torso, let arms swing freely',  workSec: 60 },
+      { id: 'trunk-twists',      name: 'Trunk Twists',         anim: 'trunk-twists',   cue: 'Rotate from the hips, look behind',   workSec: 60 },
+      { id: 'golf-arms',         name: 'Golf Arms',            anim: 'golf-arms',      cue: 'Smooth rotational swing motion',      workSec: 60 },
+      { id: 'marches-knee',      name: 'Marches Knee Steps',   anim: 'marches',        cue: 'High knees, pump arms',               workSec: 60 },
+      { id: 'windmill',          name: 'Windmill',             anim: 'windmill',        cue: 'Opposite hand to foot, stay long',    workSec: 60 },
+      { id: 'ballet-squats',     name: 'Ballet Squats',        anim: 'ballet-squat',   cue: 'Wide stance, toes out, back straight',workSec: 60 },
+      { id: 'horse-stance',      name: 'Horse Stance',         anim: 'horse-stance',   cue: 'Deep wide squat, hold strong',        workSec: 60 },
+      { id: 'body-tapping',      name: 'Body Tapping',         anim: 'body-tapping',   cue: 'Tap arms, chest, legs — wake up the body', workSec: 60 },
+    ]
+  },
+
+  // ─── WORKOUT 4: 12 Steps Short Workout — 30s work / 10s rest ──────────────
+  {
+    id: 'twelve-steps',
+    title: '12 Steps',
+    subtitle: '30 sec work · 10 sec rest',
+    emoji: '⚡',
+    color: '#ef4444',       // red
+    glow: 'rgba(239,68,68,0.3)',
+    workSec: 30,
+    restSec: 10,
+    type: 'timed',
+    exercises: [
+      { id: 'push-ups',       name: 'Push Ups',              anim: 'push-up',       cue: 'Chest to floor, full extension' },
+      { id: 'prone-cobra',    name: 'Prone Cobra',           anim: 'prone-cobra',   cue: 'Lift chest, squeeze glutes, thumbs up' },
+      { id: 'burpees',        name: 'Burpees',               anim: 'burpee',        cue: 'Drop, push, jump — full send' },
+      { id: 'pike-push-up',   name: 'Pike Push Up',          anim: 'pike-push-up',  cue: 'Hips high, head between arms' },
+      { id: 'squats',         name: 'Squats / Jump Squats',  anim: 'squat',         cue: 'Sit deep, explode up' },
+      { id: 'lunges',         name: 'Lunges',                anim: 'lunge',         cue: 'Back knee nearly touches floor' },
+      { id: 'leg-raises-12',  name: 'Leg Raises',            anim: 'leg-raise',     cue: 'Slow & controlled, no swinging' },
+      { id: 'run-in-place',   name: 'Run in Place',          anim: 'run-in-place',  cue: 'Drive knees high, pump arms' },
+      { id: 'kicks',          name: 'Kicks',                 anim: 'kicks',         cue: 'Front kicks, snap and retract' },
+      { id: 'strikes',        name: 'Strikes',               anim: 'strikes',       cue: 'Alternate punches, twist from hips' },
+      { id: 'jumps',          name: 'Jumps',                 anim: 'jumps',         cue: 'Soft landing, explode back up' },
+      { id: 'plank-12',       name: 'Plank',                 anim: 'plank-hold',    cue: 'Straight line — squeeze everything' },
+    ]
+  },
 ]
 
 // ─── KEGEL PROGRAM ──────────────────────────────────────────────────────────
