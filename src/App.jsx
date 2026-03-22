@@ -68,7 +68,7 @@ export default function App() {
             <motion.div key="programs" className="absolute inset-0"
               initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}>
-              <Programs onStartWorkout={(w) => setActiveWorkout(w)} />
+              <Programs onStartWorkout={(w) => setActiveWorkout(w)} settings={settings} />
             </motion.div>
           )}
           {tab === 'settings' && (

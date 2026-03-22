@@ -486,22 +486,104 @@ export default function KagelSessionOverlay({ session, week, onClose, onComplete
     }
   }
 
+  // Calculate total session duration
+  const totalSessionSec = exercises.reduce((sum, ex) =>
+    sum + (ex.holdSec + ex.restSec) * ex.reps * (ex.sets || 1), 0)
+  const sessionMins = Math.floor(totalSessionSec / 60)
+  const sessionSecs = totalSessionSec % 60
+
   // ── DONE ──
   if (allDone) {
+    // Confetti particles
+    const confettiColors = ['#8b5cf6', '#f59e0b', '#10b981', '#ef4444', '#3b82f6', '#ec4899']
+    const confetti = Array.from({ length: 24 }, (_, i) => ({
+      color: confettiColors[i % confettiColors.length],
+      x: `${(Math.random() - 0.5) * 240}px`,
+      y: `${Math.random() * 200 + 80}px`,
+      r: `${Math.random() * 720 - 360}deg`,
+      delay: `${Math.random() * 0.6}s`,
+      duration: `${1.2 + Math.random() * 0.8}s`,
+    }))
+
     return (
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
         className="fixed inset-0 z-50 flex flex-col items-center justify-center"
         style={{ background: '#080810', padding: '0 24px' }}>
-        <motion.div initial={{ scale: 0.5 }} animate={{ scale: 1 }}
-          transition={{ type: 'spring', bounce: 0.6 }}
-          style={{ fontSize: 72, marginBottom: 20 }}>🌸</motion.div>
-        <h2 className="text-2xl font-bold mb-2" style={{ color: '#f9fafb' }}>Session Complete!</h2>
-        <p className="text-sm mb-8 text-center" style={{ color: '#6b7280' }}>
-          {exercises.length} exercises
-        </p>
-        <button onClick={onClose}
-          className="w-full max-w-xs py-4 rounded-2xl font-bold active:scale-95"
-          style={{ background: '#8b5cf6', color: '#fff' }}>Done</button>
+
+        {/* Confetti burst */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden">
+          {confetti.map((c, i) => (
+            <div key={i} className="confetti-particle"
+              style={{
+                background: c.color,
+                '--x': c.x, '--y': c.y, '--r': c.r,
+                '--delay': c.delay, '--duration': c.duration,
+                animationDelay: c.delay,
+                animationDuration: c.duration,
+              }} />
+          ))}
+        </div>
+
+        {/* Glowing ring */}
+        <motion.div
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ type: 'spring', bounce: 0.5, delay: 0.1 }}
+          style={{
+            width: 100, height: 100, borderRadius: '50%',
+            background: 'radial-gradient(circle, rgba(139,92,246,0.2) 0%, transparent 70%)',
+            border: '2px solid rgba(139,92,246,0.4)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            marginBottom: 24,
+            boxShadow: '0 0 40px rgba(139,92,246,0.2)',
+          }}>
+          <motion.span
+            initial={{ scale: 0 }} animate={{ scale: 1 }}
+            transition={{ type: 'spring', bounce: 0.6, delay: 0.3 }}
+            style={{ fontSize: 44 }}>🌸</motion.span>
+        </motion.div>
+
+        <motion.h2
+          initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="text-2xl font-bold mb-2" style={{ color: '#f9fafb' }}>
+          Session Complete!
+        </motion.h2>
+
+        <motion.p
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+          transition={{ delay: 0.3 }}
+          className="text-sm mb-6 text-center" style={{ color: '#6b7280' }}>
+          Great work on your {session} session
+        </motion.p>
+
+        {/* Stats */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="flex gap-6 mb-8">
+          {[
+            { label: 'Exercises', value: exercises.length, icon: '💪' },
+            { label: 'Duration', value: `${sessionMins}:${String(sessionSecs).padStart(2, '0')}`, icon: '⏱' },
+            { label: 'Types', value: [...new Set(exercises.map(e => e.anim))].length, icon: '🎯' },
+          ].map(({ label, value, icon }) => (
+            <div key={label} className="text-center">
+              <div style={{ fontSize: 20, marginBottom: 4 }}>{icon}</div>
+              <div style={{ fontSize: 18, fontWeight: 700, color: '#f9fafb' }}>{value}</div>
+              <div style={{ fontSize: 11, color: '#6b7280', marginTop: 2 }}>{label}</div>
+            </div>
+          ))}
+        </motion.div>
+
+        <motion.button
+          initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+          onClick={onClose}
+          whileTap={{ scale: 0.97 }}
+          className="w-full max-w-xs py-4 rounded-2xl font-bold"
+          style={{ background: '#8b5cf6', color: '#fff' }}>
+          Done
+        </motion.button>
       </motion.div>
     )
   }
@@ -565,7 +647,7 @@ export default function KagelSessionOverlay({ session, week, onClose, onComplete
         </button>
       </div>
 
-      {/* ── EXERCISE NAME (near top) ── */}
+      {/* ── EXERCISE NAME + progress dots ── */}
       <div className="flex-shrink-0 text-center" style={{ padding: '8px 20px 0' }}>
         <AnimatePresence mode="wait">
           <motion.div key={exIdx}
@@ -575,6 +657,19 @@ export default function KagelSessionOverlay({ session, week, onClose, onComplete
             <p style={{ fontSize: 12, color: '#4b5563', marginTop: 3 }}>{currentEx?.cue}</p>
           </motion.div>
         </AnimatePresence>
+
+        {/* Progress dots */}
+        <div className="flex items-center justify-center gap-2" style={{ marginTop: 12 }}>
+          {exercises.map((_, i) => (
+            <motion.div key={i}
+              animate={{
+                width: i === exIdx ? 20 : 6,
+                background: i < exIdx ? '#10b981' : i === exIdx ? color : '#1f2937',
+              }}
+              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+              style={{ height: 6, borderRadius: 3 }} />
+          ))}
+        </div>
       </div>
 
       {/* ── CENTER: Ring + Glow (takes all remaining space) ── */}

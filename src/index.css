@@ -35,12 +35,21 @@ body {
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
+  scroll-behavior: smooth;
   /* Top: notch-safe + breathing room */
   padding-top: max(52px, calc(env(safe-area-inset-top) + 16px));
   /* Bottom: room for nav bar */
   padding-bottom: 120px;
 }
 .scroll-area::-webkit-scrollbar { display: none; }
+
+/* ── Glass card effect ─────────────────────────────────────────────── */
+.glass-card {
+  background: rgba(17, 24, 39, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
 
 /* ── Kegel glow tremble — simulates muscle tension ─────────────────── */
 @keyframes kegel-tremble {
@@ -57,6 +66,34 @@ body {
   100% { transform: scale(1.00); }
 }
 .kegel-tremble { animation: kegel-tremble 0.8s ease-in-out infinite; }
+
+/* ── Celebration confetti ──────────────────────────────────────────── */
+@keyframes confetti-fall {
+  0%   { transform: translate(0, 0) rotate(0deg) scale(1); opacity: 1; }
+  60%  { opacity: 1; }
+  100% { transform: translate(var(--x), var(--y)) rotate(var(--r)) scale(0.5); opacity: 0; }
+}
+.confetti-particle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  animation: confetti-fall var(--duration, 1.5s) cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  animation-delay: var(--delay, 0s);
+}
+
+/* ── Pulse glow for active elements ─────────────────────────────────── */
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.4); }
+  50%      { box-shadow: 0 0 16px 4px rgba(139, 92, 246, 0.15); }
+}
+.pulse-glow { animation: pulse-glow 2s ease-in-out infinite; }
+
+/* ── Shimmer effect for cards ──────────────────────────────────────── */
+@keyframes shimmer {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(200%); }
+}
 
 /* ── Stick figure animations ──────────────────────────────────────────── */
 @keyframes crunch {
@@ -125,3 +162,13 @@ body {
 .animate-mountain       { animation: mountain-climber 0.7s ease-in-out infinite; }
 .animate-bicycle        { animation: bicycle         1.2s ease-in-out infinite; }
 .animate-float          { animation: float           2s   ease-in-out infinite; }
+
+/* ── Accessibility: Respect reduced motion preference ─────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -22,26 +22,55 @@ export default function BottomNav({ active, onChange }) {
         position: 'fixed',
         bottom: 0, left: '50%', transform: 'translateX(-50%)',
         width: '100%', maxWidth: 430, zIndex: 40,
-        background: '#0a0a0a',
-        borderTop: '1px solid #111827',
-        paddingTop: 10,
+        background: 'rgba(10, 10, 10, 0.92)',
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
+        borderTop: '1px solid rgba(255,255,255,0.06)',
+        paddingTop: 8,
         paddingBottom: 'env(safe-area-inset-bottom, 8px)',
         display: 'flex', justifyContent: 'space-around', alignItems: 'center',
       }}>
         {tabs.map(({ id, label, icon: Icon }) => {
           const isActive = active === id
           return (
-            <button key={id} onClick={() => onChange(id)}
+            <motion.button key={id}
+              onClick={() => onChange(id)}
+              whileTap={{ scale: 0.85 }}
+              transition={{ duration: 0.1 }}
               className="flex flex-col items-center gap-1 relative"
-              style={{ color: isActive ? '#fff' : '#4b5563', padding: '0 24px 2px' }}>
+              style={{ color: isActive ? '#fff' : '#4b5563', padding: '2px 24px 4px' }}
+              aria-label={label}
+              role="tab"
+              aria-selected={isActive}>
+
+              {/* Sliding active bar */}
               {isActive && (
-                <motion.div layoutId="nav-pill"
-                  className="absolute -top-2.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full"
-                  style={{ background: '#f97316' }} />
+                <motion.div layoutId="nav-indicator"
+                  className="absolute -top-2 left-1/2 rounded-full"
+                  style={{
+                    width: 24, height: 2,
+                    background: '#f97316',
+                    transform: 'translateX(-50%)',
+                    boxShadow: '0 0 8px rgba(249, 115, 22, 0.4)',
+                  }}
+                  transition={{ type: 'spring', stiffness: 500, damping: 35 }} />
               )}
-              <Icon size={22} active={isActive} />
-              <span style={{ fontSize: 10, fontWeight: 500 }}>{label}</span>
-            </button>
+
+              <motion.div
+                animate={{
+                  scale: isActive ? 1 : 0.9,
+                  opacity: isActive ? 1 : 0.45,
+                }}
+                transition={{ type: 'spring', stiffness: 400, damping: 25 }}>
+                <Icon size={22} active={isActive} />
+              </motion.div>
+
+              <motion.span
+                animate={{ opacity: isActive ? 1 : 0.45 }}
+                style={{ fontSize: 10, fontWeight: isActive ? 600 : 500 }}>
+                {label}
+              </motion.span>
+            </motion.button>
           )
         })}
       </nav>

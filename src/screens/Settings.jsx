@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 
 // Safe Notification permission check — iOS Safari doesn't have this API
 function getNotifPermission() {
@@ -11,8 +11,47 @@ function getNotifPermission() {
   }
 }
 
+// ─── 7-day activity chart ────────────────────────────────────────────────────
+function ActivityChart({ completedWorkouts = [] }) {
+  const days = []
+  const labels = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
+  const now = new Date()
+
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(now)
+    d.setDate(d.getDate() - i)
+    const dateStr = d.toDateString()
+    const count = completedWorkouts.filter(w => new Date(w.date).toDateString() === dateStr).length
+    days.push({ label: labels[d.getDay()], count, isToday: i === 0 })
+  }
+
+  const maxCount = Math.max(3, ...days.map(d => d.count))
+
+  return (
+    <div className="flex items-end justify-between gap-2" style={{ height: 60, padding: '0 4px' }}>
+      {days.map((d, i) => (
+        <div key={i} className="flex flex-col items-center gap-1" style={{ flex: 1 }}>
+          <div style={{
+            width: '100%', maxWidth: 20, borderRadius: 4,
+            height: Math.max(4, (d.count / maxCount) * 40),
+            background: d.count > 0
+              ? d.isToday ? '#8b5cf6' : '#7c3aed88'
+              : '#1f2937',
+            transition: 'height 0.5s ease, background 0.3s ease',
+          }} />
+          <span style={{
+            fontSize: 9, fontWeight: d.isToday ? 700 : 400,
+            color: d.isToday ? '#a78bfa' : '#4b5563',
+          }}>{d.label}</span>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 export default function Settings({ settings, onUpdate, requestPermission }) {
   const [notifStatus, setNotifStatus] = useState(getNotifPermission)
+  const [copied, setCopied] = useState(false)
 
   const handleEnableNotifications = async () => {
     try {
@@ -28,6 +67,24 @@ export default function Settings({ settings, onUpdate, requestPermission }) {
   const toggle = (key) => onUpdate({ [key]: !settings[key] })
   const isUnsupported = notifStatus === 'unsupported'
 
+  const handleCopyData = async () => {
+    try {
+      await navigator.clipboard.writeText(JSON.stringify(settings, null, 2))
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      // Fallback for older browsers
+      const el = document.createElement('textarea')
+      el.value = JSON.stringify(settings)
+      document.body.appendChild(el)
+      el.select()
+      document.execCommand('copy')
+      document.body.removeChild(el)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    }
+  }
+
   return (
     <div className="scroll-area" style={{ paddingLeft: 20, paddingRight: 20 }}>
 
@@ -41,7 +98,7 @@ export default function Settings({ settings, onUpdate, requestPermission }) {
         {isUnsupported ? (
           <div className="p-4">
             <p className="text-sm" style={{ color: '#6b7280' }}>
-              🚫 Notifications are not supported in this browser.
+              Notifications are not supported in this browser.
               On iOS, install the app to your home screen first.
             </p>
           </div>
@@ -59,8 +116,8 @@ export default function Settings({ settings, onUpdate, requestPermission }) {
                 color: notifStatus === 'denied' ? '#4b5563' : '#fff',
               }}>
               {notifStatus === 'denied'
-                ? '🚫 Blocked — Enable in Browser Settings'
-                : '🔔 Enable Notifications'}
+                ? 'Blocked — Enable in Browser Settings'
+                : 'Enable Notifications'}
             </button>
           </div>
         ) : (
@@ -69,12 +126,14 @@ export default function Settings({ settings, onUpdate, requestPermission }) {
               value={settings.notificationsEnabled}
               onToggle={() => toggle('notificationsEnabled')} />
             <TimeRow
-              label="☀️ Morning Kegel"
+              label="Morning Kegel"
+              emoji="☀️"
               value={settings.morningTime || '07:00'}
               onChange={(v) => onUpdate({ morningTime: v })}
               disabled={!settings.notificationsEnabled} />
             <TimeRow
-              label="🌙 Evening Kegel"
+              label="Evening Kegel"
+              emoji="🌙"
               value={settings.eveningTime || '20:00'}
               onChange={(v) => onUpdate({ eveningTime: v })}
               disabled={!settings.notificationsEnabled} />
@@ -83,20 +142,30 @@ export default function Settings({ settings, onUpdate, requestPermission }) {
       </Section>
 
       {/* Progress */}
-      <Section title="Progress" delay={0.1}>
+      <Section title="Your Progress" delay={0.1}>
+        {/* Activity chart */}
+        <div className="px-4 pt-4 pb-2">
+          <p className="text-xs mb-3" style={{ color: '#4b5563', fontWeight: 500 }}>Last 7 days</p>
+          <ActivityChart completedWorkouts={settings.completedWorkouts} />
+        </div>
+
         <div className="grid grid-cols-2 gap-3 p-4">
           {[
-            { label: 'Streak', value: `${settings.streakDays || 0} days`, icon: '🔥' },
-            { label: 'Workouts', value: settings.completedWorkouts?.length || 0, icon: '✅' },
+            { label: 'Current streak', value: `${settings.streakDays || 0} days`, icon: '🔥' },
+            { label: 'Total workouts', value: settings.completedWorkouts?.length || 0, icon: '✅' },
           ].map(({ label, value, icon }) => (
             <div key={label} className="rounded-2xl p-3 text-center"
-              style={{ background: '#0d1117', border: '1px solid #1f2937' }}>
+              style={{
+                background: 'linear-gradient(145deg, #0d1117 0%, #111827 100%)',
+                border: '1px solid #1f2937',
+              }}>
               <div className="text-2xl">{icon}</div>
               <div className="text-xl font-bold mt-1" style={{ color: '#f9fafb' }}>{value}</div>
               <div className="text-xs mt-0.5" style={{ color: '#6b7280' }}>{label}</div>
             </div>
           ))}
         </div>
+
         <div className="px-4 pb-4">
           <button
             onClick={() => {
@@ -111,13 +180,36 @@ export default function Settings({ settings, onUpdate, requestPermission }) {
         </div>
       </Section>
 
+      {/* Data Safety */}
+      <Section title="Data Safety" delay={0.15}>
+        <div className="p-4 flex flex-col gap-3">
+          <p className="text-sm leading-relaxed" style={{ color: '#9ca3af' }}>
+            All data is stored locally on your device. No account needed, no data leaves your phone.
+          </p>
+          <motion.button
+            onClick={handleCopyData}
+            whileTap={{ scale: 0.97 }}
+            className="w-full py-3 rounded-2xl text-sm font-semibold transition-all"
+            style={{
+              background: copied ? 'rgba(16, 185, 129, 0.15)' : '#1f2937',
+              color: copied ? '#10b981' : '#9ca3af',
+              border: copied ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid #374151',
+            }}>
+            {copied ? '✓ Copied to clipboard!' : '📋 Copy Backup Data'}
+          </motion.button>
+          <p className="text-xs" style={{ color: '#374151' }}>
+            Save this data somewhere safe. You can restore it by pasting it back.
+          </p>
+        </div>
+      </Section>
+
       {/* About */}
-      <Section title="About" delay={0.15}>
+      <Section title="About" delay={0.2}>
         <div className="p-4 flex flex-col gap-3">
           <Row label="App" value="RepFlow" />
-          <Row label="Version" value="1.0.0" />
+          <Row label="Version" value="1.1.0" />
           <Row label="Storage" value="100% local — no account needed" />
-          <Row label="Cost" value="Free forever 🎉" />
+          <Row label="Cost" value="Free forever" />
         </div>
       </Section>
 
@@ -135,9 +227,13 @@ export default function Settings({ settings, onUpdate, requestPermission }) {
 function Section({ title, children, delay = 0 }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay }}
+      initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+      transition={{ delay, ease: [0.16, 1, 0.3, 1] }}
       className="rounded-3xl overflow-hidden mb-4"
-      style={{ background: '#111827', border: '1px solid #1f2937' }}>
+      style={{
+        background: 'linear-gradient(145deg, #111827 0%, #0d1117 100%)',
+        border: '1px solid rgba(255,255,255,0.06)',
+      }}>
       <div className="px-4 py-3" style={{ borderBottom: '1px solid #1f2937' }}>
         <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: '#6b7280' }}>
           {title}
@@ -153,25 +249,34 @@ function SettingRow({ label, value, onToggle }) {
     <div className="flex items-center justify-between px-4 py-3.5"
       style={{ borderBottom: '1px solid #1f2937' }}>
       <span className="text-sm" style={{ color: '#e5e7eb' }}>{label}</span>
-      <button onClick={onToggle}
-        className="w-12 h-6 rounded-full transition-all relative flex-shrink-0"
-        style={{ background: value ? '#8b5cf6' : '#374151' }}>
-        <div className="absolute top-0.5 rounded-full w-5 h-5 bg-white transition-all"
-          style={{ left: value ? 26 : 2 }} />
-      </button>
+      <motion.button onClick={onToggle}
+        whileTap={{ scale: 0.9 }}
+        className="w-12 h-7 rounded-full relative flex-shrink-0"
+        style={{ background: value ? '#8b5cf6' : '#374151', transition: 'background 0.3s ease' }}
+        role="switch" aria-checked={value}>
+        <motion.div
+          layout
+          transition={{ type: 'spring', stiffness: 500, damping: 35 }}
+          className="absolute top-1 rounded-full w-5 h-5 bg-white"
+          style={{ left: value ? 24 : 4 }} />
+      </motion.button>
     </div>
   )
 }
 
-function TimeRow({ label, value, onChange, disabled }) {
+function TimeRow({ label, emoji, value, onChange, disabled }) {
   return (
     <div className="flex items-center justify-between px-4 py-3.5"
-      style={{ borderBottom: '1px solid #1f2937', opacity: disabled ? 0.4 : 1 }}>
-      <span className="text-sm" style={{ color: '#e5e7eb' }}>{label}</span>
+      style={{ borderBottom: '1px solid #1f2937', opacity: disabled ? 0.4 : 1, transition: 'opacity 0.3s' }}>
+      <span className="text-sm" style={{ color: '#e5e7eb' }}>{emoji} {label}</span>
       <input type="time" value={value} disabled={disabled}
         onChange={(e) => onChange(e.target.value)}
         className="text-sm font-mono rounded-xl px-3 py-1.5 outline-none"
-        style={{ background: '#1f2937', color: '#f9fafb', border: '1px solid #374151' }} />
+        style={{
+          background: '#1f2937', color: '#f9fafb',
+          border: '1px solid #374151',
+          WebkitAppearance: 'none',
+        }} />
     </div>
   )
 }
