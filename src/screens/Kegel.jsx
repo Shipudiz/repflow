@@ -5,10 +5,10 @@ import { useSeenExercises } from '../hooks/useSeenExercises'
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const ANIM_META = {
-  'kegel-breathe':  { color: '#ef4444' },
-  'kegel-flick':    { color: '#f59e0b' },
-  'kegel-elevator': { color: '#06b6d4' },
-  'kegel-reverse':  { color: '#10b981' },
+  'kegel-breathe':  { color: '#b3c5ff', label: 'Long Hold' },
+  'kegel-flick':    { color: '#b3c5ff', label: 'Short Flicks' },
+  'kegel-elevator': { color: '#b3c5ff', label: 'Elevator' },
+  'kegel-reverse':  { color: '#b3c5ff', label: 'Reverse Kegel' },
 }
 
 const TUTORIALS = {
@@ -54,7 +54,11 @@ const TUTORIALS = {
   },
 }
 
-// ─── Tutorial Modal (with Skip button) ──────────────────────────────────────
+// ─── Font helpers ─────────────────────────────────────────────────────────────
+const plusJakarta = "'Plus Jakarta Sans', sans-serif"
+const inter = "'Inter', sans-serif"
+
+// ─── Tutorial Modal ──────────────────────────────────────────────────────────
 function TutorialModal({ animType, onDone }) {
   const meta = ANIM_META[animType] || ANIM_META['kegel-breathe']
   const tutorial = TUTORIALS[animType] || TUTORIALS['kegel-breathe']
@@ -64,34 +68,51 @@ function TutorialModal({ animType, onDone }) {
   return (
     <motion.div
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[70] flex flex-col items-center justify-center"
-      style={{ background: 'rgba(0,0,0,0.92)', padding: '0 24px' }}>
+      style={{
+        position: 'fixed', inset: 0, zIndex: 70,
+        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+        background: 'rgba(0,0,0,0.92)', padding: '0 24px',
+      }}>
       <motion.div
         initial={{ scale: 0.92, opacity: 0, y: 20 }}
         animate={{ scale: 1, opacity: 1, y: 0 }}
         transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-        className="w-full max-w-sm rounded-3xl overflow-hidden"
-        style={{ background: '#111827', border: `1px solid ${meta.color}33` }}>
+        style={{
+          width: '100%', maxWidth: 384, borderRadius: 24, overflow: 'hidden',
+          background: '#201f1f', border: `1px solid ${meta.color}33`,
+        }}>
 
         {/* Header with Skip */}
-        <div className="flex items-center justify-between"
-          style={{ padding: '20px 20px 16px', borderBottom: '1px solid #1f2937' }}>
+        <div style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          padding: '20px 20px 16px', borderBottom: '1px solid #353534',
+        }}>
           <div>
-            <p className="text-xs uppercase tracking-wider mb-1"
-              style={{ color: meta.color, fontWeight: 600 }}>First time</p>
-            <h2 className="text-lg font-bold" style={{ color: '#f9fafb' }}>{tutorial.title}</h2>
+            <p style={{
+              fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.05em',
+              marginBottom: 4, color: meta.color, fontWeight: 600, fontFamily: inter,
+            }}>First time</p>
+            <h2 style={{ fontSize: 18, fontWeight: 700, color: '#e5e2e1', fontFamily: plusJakarta }}>
+              {tutorial.title}
+            </h2>
           </div>
           <button onClick={onDone}
-            style={{ fontSize: 12, color: '#4b5563', fontWeight: 500, padding: '6px 12px' }}>
+            style={{
+              fontSize: 12, color: '#8d90a2', fontWeight: 500, padding: '6px 12px',
+              background: 'none', border: 'none', cursor: 'pointer', fontFamily: inter,
+            }}>
             Skip
           </button>
         </div>
 
         {/* Step dots */}
-        <div className="flex gap-1.5" style={{ padding: '16px 20px 12px' }}>
+        <div style={{ display: 'flex', gap: 6, padding: '16px 20px 12px' }}>
           {tutorial.steps.map((_, i) => (
-            <div key={i} className="h-1 flex-1 rounded-full"
-              style={{ background: i <= step ? meta.color : '#1f2937', transition: 'background 0.3s' }} />
+            <div key={i} style={{
+              height: 4, flex: 1, borderRadius: 2,
+              background: i <= step ? meta.color : '#353534',
+              transition: 'background 0.3s',
+            }} />
           ))}
         </div>
 
@@ -101,7 +122,7 @@ function TutorialModal({ animType, onDone }) {
             <motion.p key={step}
               initial={{ opacity: 0, x: 12 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -12 }}
               transition={{ duration: 0.2 }}
-              style={{ fontSize: 14, lineHeight: 1.6, color: '#d1d5db' }}>
+              style={{ fontSize: 14, lineHeight: 1.6, color: '#d1d5db', fontFamily: inter }}>
               <span style={{ fontWeight: 700, color: meta.color }}>Step {step + 1}: </span>
               {tutorial.steps[step]}
             </motion.p>
@@ -109,21 +130,29 @@ function TutorialModal({ animType, onDone }) {
         </div>
 
         {isLast && (
-          <div style={{ margin: '0 20px 16px', padding: '12px 16px', borderRadius: 16,
-            background: '#1a1a2e', fontSize: 12, color: '#9ca3af' }}>
+          <div style={{
+            margin: '0 20px 16px', padding: '12px 16px', borderRadius: 16,
+            background: '#353534', fontSize: 12, color: '#8d90a2', fontFamily: inter,
+          }}>
             {tutorial.warning}
           </div>
         )}
 
-        <div className="flex gap-2" style={{ padding: '0 20px 20px' }}>
+        <div style={{ display: 'flex', gap: 8, padding: '0 20px 20px' }}>
           {step > 0 && (
             <button onClick={() => setStep(s => s - 1)}
-              className="flex-1 rounded-2xl font-semibold text-sm active:scale-95"
-              style={{ padding: '12px', background: '#1f2937', color: '#9ca3af' }}>Back</button>
+              style={{
+                flex: 1, padding: 12, borderRadius: 16, fontWeight: 600, fontSize: 14,
+                background: '#353534', color: '#8d90a2', border: 'none', cursor: 'pointer',
+                fontFamily: plusJakarta,
+              }}>Back</button>
           )}
           <button onClick={() => isLast ? onDone() : setStep(s => s + 1)}
-            className="flex-1 rounded-2xl font-bold text-sm active:scale-95"
-            style={{ padding: '12px', background: meta.color, color: '#fff' }}>
+            style={{
+              flex: 1, padding: 12, borderRadius: 16, fontWeight: 700, fontSize: 14,
+              background: meta.color, color: '#131313', border: 'none', cursor: 'pointer',
+              fontFamily: plusJakarta,
+            }}>
             {isLast ? "Got it!" : 'Next'}
           </button>
         </div>
@@ -132,165 +161,107 @@ function TutorialModal({ animType, onDone }) {
   )
 }
 
-// ─── Kegel Visual ─────────────────────────────────────────────────────────────
-// Ring: ONE full rotation = entire drill duration. Dot leads the arc.
-// Glow: appears during squeeze, trembles, stays within screen bounds.
-function KagelVisual({ isSqueeze, totalProgress, totalTimeLeft, phaseLabel, color }) {
-  const ringSize = 240
+// ─── Timer Ring Component ─────────────────────────────────────────────────────
+function TimerRing({ isSqueeze, totalProgress, totalTimeLeft }) {
+  const ringSize = 192
   const strokeW = 3
   const r = (ringSize - strokeW * 2) / 2
   const circ = 2 * Math.PI * r
 
-  // totalProgress: 0→1 over the ENTIRE drill (e.g. 48 sec = one full rotation)
   const p = Math.min(1, Math.max(0, totalProgress))
   const arcOffset = circ * (1 - p)
 
-  // Dot position in SVG local coords (before rotation)
-  // SVG default: angle 0 = 3 o'clock (right). With rotate(90deg), right becomes bottom.
-  // So in local coords: angle 0 = right = screen bottom after rotation.
-  const angle = 2 * Math.PI * p
+  // Dot position
+  const angle = -Math.PI / 2 + 2 * Math.PI * p
   const dotCx = ringSize / 2 + r * Math.cos(angle)
   const dotCy = ringSize / 2 + r * Math.sin(angle)
 
-  // Glow size: 85vw but maxed at 380px so it never overflows the screen
-  // Trembling: subtle scale oscillation via CSS animation
-  const glowSize = 'min(85vw, 380px)'
+  const glowColor = '#6ba3ff'
 
   return (
-    <div className="relative w-full flex-1 flex flex-col items-center justify-center overflow-hidden">
+    <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      {/* Outer glow during squeeze */}
+      <motion.div
+        animate={{
+          opacity: isSqueeze ? 0.7 : 0,
+          scale: isSqueeze ? 1 : 0.85,
+        }}
+        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+        style={{
+          position: 'absolute',
+          width: ringSize + 60,
+          height: ringSize + 60,
+          borderRadius: '50%',
+          background: `radial-gradient(circle, ${glowColor}25 0%, ${glowColor}15 30%, ${glowColor}08 50%, transparent 70%)`,
+          pointerEvents: 'none',
+        }}
+      />
 
-      {/* ── GLOW — only during squeeze ── */}
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <motion.div
-          animate={{
-            opacity: isSqueeze ? 1 : 0,
-            scale: isSqueeze ? 1 : 0.2,
-          }}
-          transition={{
-            opacity: { duration: isSqueeze ? 0.6 : 0.4 },
-            scale: { duration: isSqueeze ? 0.8 : 0.5, ease: [0.16, 1, 0.3, 1] },
-          }}
-          className={isSqueeze ? 'kegel-tremble' : ''}
-          style={{
-            width: glowSize, height: glowSize, flexShrink: 0, borderRadius: '50%',
-            background: `radial-gradient(circle at center,
-              transparent 0%,
-              transparent 20%,
-              ${color}15 26%,
-              ${color}44 32%,
-              ${color}88 40%,
-              ${color}cc 48%,
-              ${color}ff 55%,
-              ${color}dd 62%,
-              ${color}88 70%,
-              ${color}44 80%,
-              ${color}11 90%,
-              transparent 100%)`,
-          }}
-        />
-      </div>
-
-      {/* ── Subtle dark halo during RELAX ── */}
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <motion.div
-          animate={{ opacity: isSqueeze ? 0 : 0.5 }}
-          transition={{ duration: 0.5 }}
-          style={{
-            width: ringSize + 50, height: ringSize + 50, flexShrink: 0, borderRadius: '50%',
-            background: 'radial-gradient(circle, #161626 0%, #10101a 45%, transparent 68%)',
-          }}
-        />
-      </div>
-
-      {/* ── RING ── */}
-      <div className="relative flex items-center justify-center z-10"
-        style={{ width: ringSize, height: ringSize }}>
-
-        {/* SVG ring — rotate(90deg) so arc starts at bottom */}
-        <svg width={ringSize} height={ringSize}
-          viewBox={`0 0 ${ringSize} ${ringSize}`}
-          style={{ position: 'absolute', top: 0, left: 0, transform: 'rotate(90deg)' }}>
+      {/* SVG Ring */}
+      <div style={{ position: 'relative', width: ringSize, height: ringSize }}>
+        <svg width={ringSize} height={ringSize} viewBox={`0 0 ${ringSize} ${ringSize}`}
+          style={{ position: 'absolute', top: 0, left: 0 }}>
           {/* Track */}
           <circle cx={ringSize / 2} cy={ringSize / 2} r={r}
             fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth={strokeW} />
           {/* Filled arc */}
           <circle cx={ringSize / 2} cy={ringSize / 2} r={r}
             fill="none"
-            stroke="rgba(255,255,255,0.45)"
+            stroke={isSqueeze ? glowColor : 'rgba(255,255,255,0.25)'}
             strokeWidth={strokeW}
             strokeLinecap="round"
             strokeDasharray={circ}
             strokeDashoffset={arcOffset}
+            style={{
+              transform: 'rotate(-90deg)',
+              transformOrigin: '50% 50%',
+              filter: isSqueeze ? `drop-shadow(0 0 6px ${glowColor}88)` : 'none',
+              transition: 'stroke 0.4s ease, filter 0.4s ease',
+            }}
           />
-          {/* Dot at head of arc (leads the fill) */}
+          {/* Dot at head of arc */}
           {p > 0.003 && p < 0.997 && (
-            <circle cx={dotCx} cy={dotCy} r={5} fill="white"
-              style={{ filter: 'drop-shadow(0 0 4px rgba(255,255,255,0.5))' }} />
+            <circle
+              cx={dotCx} cy={dotCy} r={4}
+              fill="white"
+              style={{ filter: isSqueeze ? `drop-shadow(0 0 6px ${glowColor})` : 'drop-shadow(0 0 3px rgba(255,255,255,0.4))' }}
+            />
           )}
         </svg>
 
-        {/* Tick mark at bottom (start/end) — not rotated */}
-        <svg width={ringSize} height={ringSize}
-          viewBox={`0 0 ${ringSize} ${ringSize}`}
-          style={{ position: 'absolute', top: 0, left: 0 }}>
-          <line
-            x1={ringSize / 2} y1={ringSize / 2 + r - 7}
-            x2={ringSize / 2} y2={ringSize / 2 + r + 7}
-            stroke="rgba(255,255,255,0.08)" strokeWidth={1.5} strokeLinecap="round" />
-        </svg>
-
-        {/* Dark center — only when glow is showing */}
-        <div className="rounded-full flex flex-col items-center justify-center"
-          style={{
-            width: ringSize - strokeW * 2 - 18,
-            height: ringSize - strokeW * 2 - 18,
-            background: isSqueeze ? 'rgba(6,6,16,0.88)' : 'transparent',
-            transition: 'background 0.5s ease',
+        {/* Center content */}
+        <div style={{
+          position: 'absolute', inset: 0,
+          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+        }}>
+          <span style={{
+            fontFamily: plusJakarta, fontWeight: 800, fontSize: 45,
+            color: '#e5e2e1', letterSpacing: '-1.5px', lineHeight: 1,
+            fontVariantNumeric: 'tabular-nums',
           }}>
-          {/* Total time left */}
-          <span className="font-bold tabular-nums leading-none"
-            style={{ fontSize: 56, color: '#fff', letterSpacing: '-2px' }}>
             {totalTimeLeft}
           </span>
-
-          {/* Phase label */}
-          <AnimatePresence mode="wait">
-            <motion.span key={phaseLabel}
-              initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }}
-              transition={{ duration: 0.15 }}
-              style={{ fontSize: 13, color: 'rgba(255,255,255,0.35)', marginTop: 8, fontWeight: 500 }}>
-              {phaseLabel}
-            </motion.span>
-          </AnimatePresence>
+          <span style={{
+            fontFamily: inter, fontWeight: 600, fontSize: 9,
+            color: '#8d90a2', textTransform: 'uppercase', letterSpacing: '0.1em',
+            marginTop: 6,
+          }}>
+            REMAINING
+          </span>
         </div>
-      </div>
-
-      {/* Breathing instruction — clearly visible below ring */}
-      <div style={{ marginTop: 24, minHeight: 24, textAlign: 'center' }}>
-        <AnimatePresence mode="wait">
-          <motion.p key={phaseLabel}
-            initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }}
-            transition={{ duration: 0.2 }}
-            style={{ color: 'rgba(255,255,255,0.35)', fontSize: 14, letterSpacing: '0.03em', fontWeight: 500 }}>
-            {isSqueeze ? 'breathe out slowly' : 'breathe in, full release'}
-          </motion.p>
-        </AnimatePresence>
       </div>
     </div>
   )
 }
 
 // ─── Drill Timer Hook ─────────────────────────────────────────────────────────
-// One rAF timer for the entire drill.
-// totalProgress: 0→1 over entire drill (one ring rotation).
-// Phase (squeeze/release) derived from elapsed time.
 function useDrillTimer(holdSec, restSec, reps, paused, onComplete, resetKey) {
   const totalDuration = (holdSec + restSec) * reps
   const cycleDuration = holdSec + restSec
 
   const [state, setState] = useState({
     totalTimeLeft: totalDuration,
-    totalProgress: 0,       // 0→1 for ONE full ring rotation
+    totalProgress: 0,
     phaseLabel: 'Contract & hold',
     isSqueeze: true,
   })
@@ -336,18 +307,14 @@ function useDrillTimer(holdSec, restSec, reps, paused, onComplete, resetKey) {
         return
       }
 
-      // Derive phase
       const cycleElapsed = elapsed % cycleDuration
       const isSqueeze = cycleElapsed < holdSec
 
-      // Phase transition sounds
       if (lastSqueezeRef.current !== null && lastSqueezeRef.current !== isSqueeze) {
         if (isSqueeze) sounds.workStart()
         else sounds.restStart()
       }
       lastSqueezeRef.current = isSqueeze
-
-      // (haptic handled via separate interval below)
 
       setState({
         totalTimeLeft: Math.ceil(remaining),
@@ -366,13 +333,92 @@ function useDrillTimer(holdSec, restSec, reps, paused, onComplete, resetKey) {
   useEffect(() => {
     if (paused) {
       if (rafId.current) cancelAnimationFrame(rafId.current)
-      if (navigator.vibrate) try { navigator.vibrate(0) } catch (e) {} // stop vibration
+      if (navigator.vibrate) try { navigator.vibrate(0) } catch (e) {}
     } else {
       startTs.current = null
     }
   }, [paused])
 
   return state
+}
+
+// ─── Session Timeline ─────────────────────────────────────────────────────────
+function SessionTimeline({ exercises, exIdx, drillProgress }) {
+  const totalSegments = exercises.length
+  const completedSegments = exIdx
+  const currentProgress = drillProgress || 0
+  const overallProgress = Math.round(((completedSegments + currentProgress) / totalSegments) * 100)
+
+  return (
+    <div style={{ padding: '0 32px', marginBottom: 16 }}>
+      <div style={{
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        marginBottom: 8,
+      }}>
+        <span style={{
+          fontFamily: inter, fontWeight: 600, fontSize: 9,
+          color: '#8d90a2', textTransform: 'uppercase', letterSpacing: '0.08em',
+        }}>Session Timeline</span>
+        <span style={{
+          fontFamily: inter, fontWeight: 600, fontSize: 9,
+          color: '#8d90a2', textTransform: 'uppercase', letterSpacing: '0.08em',
+        }}>{overallProgress}% Complete</span>
+      </div>
+      <div style={{ display: 'flex', gap: 4 }}>
+        {exercises.map((_, i) => (
+          <div key={i} style={{
+            flex: 1, height: 4, borderRadius: 2, overflow: 'hidden',
+            background: '#353534',
+          }}>
+            <motion.div
+              animate={{
+                width: i < exIdx ? '100%' : i === exIdx ? `${currentProgress * 100}%` : '0%',
+              }}
+              transition={{ duration: 0.3 }}
+              style={{
+                height: '100%', borderRadius: 2,
+                background: '#b3c5ff',
+              }}
+            />
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// ─── Stats Grid ───────────────────────────────────────────────────────────────
+function StatsGrid({ currentSet, totalSets, elapsedTime }) {
+  const mins = Math.floor(elapsedTime / 60)
+  const secs = elapsedTime % 60
+  const timeStr = `${mins}:${String(secs).padStart(2, '0')}`
+
+  return (
+    <div style={{
+      display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8,
+      padding: '0 32px', marginBottom: 16,
+    }}>
+      {[
+        { label: 'SET', value: `${currentSet} / ${totalSets}` },
+        { label: 'TOTAL TIME', value: timeStr },
+      ].map(({ label, value }) => (
+        <div key={label} style={{
+          background: '#1c1b1b', borderRadius: 8, padding: '14px 16px',
+          borderBottom: '2px solid #b3c5ff',
+        }}>
+          <span style={{
+            fontFamily: inter, fontWeight: 600, fontSize: 9,
+            color: '#8d90a2', textTransform: 'uppercase', letterSpacing: '0.08em',
+            display: 'block', marginBottom: 4,
+          }}>{label}</span>
+          <span style={{
+            fontFamily: plusJakarta, fontWeight: 700, fontSize: 18,
+            color: '#e5e2e1', fontVariantNumeric: 'tabular-nums',
+          }}>{value}</span>
+        </div>
+      ))}
+    </div>
+  )
 }
 
 // ─── Main Session Overlay ─────────────────────────────────────────────────────
@@ -385,17 +431,27 @@ export default function KagelSessionOverlay({ session, week, onClose, onComplete
   const [started, setStarted] = useState(false)
   const [allDone, setAllDone] = useState(false)
   const [drillResetKey, setDrillResetKey] = useState(0)
+  const [totalElapsed, setTotalElapsed] = useState(0)
+  const elapsedRef = useRef(null)
 
   const currentEx = exercises[exIdx]
   const meta = ANIM_META[currentEx?.anim] || ANIM_META['kegel-breathe']
-  const color = meta.color
+
+  // Track total elapsed time
+  useEffect(() => {
+    if (!started || isPaused || allDone) {
+      clearInterval(elapsedRef.current)
+      return
+    }
+    elapsedRef.current = setInterval(() => setTotalElapsed(e => e + 1), 1000)
+    return () => clearInterval(elapsedRef.current)
+  }, [started, isPaused, allDone])
 
   // Mute handling
   const prevMuted = useRef(isMuted)
   useEffect(() => {
     if (isMuted !== prevMuted.current) {
       prevMuted.current = isMuted
-      // Toggle sound module
       if (typeof sounds.setMuted === 'function') sounds.setMuted(isMuted)
     }
   }, [isMuted])
@@ -448,17 +504,16 @@ export default function KagelSessionOverlay({ session, week, onClose, onComplete
     `${exIdx}-${drillResetKey}`
   )
 
-  // Haptic vibration during squeeze — interval-based for reliability
+  // Haptic vibration during squeeze
   useEffect(() => {
     if (!started || isPaused || !drillState.isSqueeze) {
       if (navigator.vibrate) try { navigator.vibrate(0) } catch (e) {}
       return
     }
-    // Pulse vibration every 700ms during squeeze
     const vibrate = () => {
       if (navigator.vibrate) try { navigator.vibrate(80) } catch (e) {}
     }
-    vibrate() // immediate first pulse
+    vibrate()
     const id = setInterval(vibrate, 700)
     return () => {
       clearInterval(id)
@@ -494,8 +549,7 @@ export default function KagelSessionOverlay({ session, week, onClose, onComplete
 
   // ── DONE ──
   if (allDone) {
-    // Confetti particles
-    const confettiColors = ['#8b5cf6', '#f59e0b', '#10b981', '#ef4444', '#3b82f6', '#ec4899']
+    const confettiColors = ['#b3c5ff', '#6ba3ff', '#10b981', '#f59e0b', '#3b82f6', '#ec4899']
     const confetti = Array.from({ length: 24 }, (_, i) => ({
       color: confettiColors[i % confettiColors.length],
       x: `${(Math.random() - 0.5) * 240}px`,
@@ -507,11 +561,18 @@ export default function KagelSessionOverlay({ session, week, onClose, onComplete
 
     return (
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-        className="fixed inset-0 z-50 flex flex-col items-center justify-center"
-        style={{ background: '#080810', padding: '0 24px' }}>
+        style={{
+          position: 'fixed', inset: 0, zIndex: 50,
+          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+          background: '#131313', padding: '0 24px',
+        }}>
 
         {/* Confetti burst */}
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden">
+        <div style={{
+          position: 'absolute', inset: 0,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          pointerEvents: 'none', overflow: 'hidden',
+        }}>
           {confetti.map((c, i) => (
             <div key={i} className="confetti-particle"
               style={{
@@ -524,53 +585,60 @@ export default function KagelSessionOverlay({ session, week, onClose, onComplete
           ))}
         </div>
 
-        {/* Glowing ring */}
         <motion.div
           initial={{ scale: 0, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ type: 'spring', bounce: 0.5, delay: 0.1 }}
           style={{
             width: 100, height: 100, borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(139,92,246,0.2) 0%, transparent 70%)',
-            border: '2px solid rgba(139,92,246,0.4)',
+            background: 'radial-gradient(circle, rgba(179,197,255,0.2) 0%, transparent 70%)',
+            border: '2px solid rgba(179,197,255,0.4)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             marginBottom: 24,
-            boxShadow: '0 0 40px rgba(139,92,246,0.2)',
+            boxShadow: '0 0 40px rgba(179,197,255,0.2)',
           }}>
           <motion.span
             initial={{ scale: 0 }} animate={{ scale: 1 }}
             transition={{ type: 'spring', bounce: 0.6, delay: 0.3 }}
-            style={{ fontSize: 44 }}>🌸</motion.span>
+            style={{ fontSize: 44 }}>&#x1F338;</motion.span>
         </motion.div>
 
         <motion.h2
           initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="text-2xl font-bold mb-2" style={{ color: '#f9fafb' }}>
+          style={{
+            fontSize: 24, fontWeight: 700, marginBottom: 8, color: '#e5e2e1',
+            fontFamily: plusJakarta,
+          }}>
           Session Complete!
         </motion.h2>
 
         <motion.p
           initial={{ opacity: 0 }} animate={{ opacity: 1 }}
           transition={{ delay: 0.3 }}
-          className="text-sm mb-6 text-center" style={{ color: '#6b7280' }}>
+          style={{
+            fontSize: 14, marginBottom: 24, textAlign: 'center',
+            color: '#8d90a2', fontFamily: inter,
+          }}>
           Great work on your {session} session
         </motion.p>
 
-        {/* Stats */}
         <motion.div
           initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="flex gap-6 mb-8">
+          style={{ display: 'flex', gap: 24, marginBottom: 32 }}>
           {[
-            { label: 'Exercises', value: exercises.length, icon: '💪' },
-            { label: 'Duration', value: `${sessionMins}:${String(sessionSecs).padStart(2, '0')}`, icon: '⏱' },
-            { label: 'Types', value: [...new Set(exercises.map(e => e.anim))].length, icon: '🎯' },
-          ].map(({ label, value, icon }) => (
-            <div key={label} className="text-center">
-              <div style={{ fontSize: 20, marginBottom: 4 }}>{icon}</div>
-              <div style={{ fontSize: 18, fontWeight: 700, color: '#f9fafb' }}>{value}</div>
-              <div style={{ fontSize: 11, color: '#6b7280', marginTop: 2 }}>{label}</div>
+            { label: 'Exercises', value: exercises.length },
+            { label: 'Duration', value: `${sessionMins}:${String(sessionSecs).padStart(2, '0')}` },
+            { label: 'Types', value: [...new Set(exercises.map(e => e.anim))].length },
+          ].map(({ label, value }) => (
+            <div key={label} style={{ textAlign: 'center' }}>
+              <div style={{
+                fontSize: 18, fontWeight: 700, color: '#e5e2e1', fontFamily: plusJakarta,
+              }}>{value}</div>
+              <div style={{
+                fontSize: 11, color: '#8d90a2', marginTop: 2, fontFamily: inter,
+              }}>{label}</div>
             </div>
           ))}
         </motion.div>
@@ -580,8 +648,12 @@ export default function KagelSessionOverlay({ session, week, onClose, onComplete
           transition={{ delay: 0.5 }}
           onClick={onClose}
           whileTap={{ scale: 0.97 }}
-          className="w-full max-w-xs py-4 rounded-2xl font-bold"
-          style={{ background: '#8b5cf6', color: '#fff' }}>
+          style={{
+            width: '100%', maxWidth: 320, padding: '16px 0', borderRadius: 16,
+            fontWeight: 700, fontSize: 14, color: '#fff', border: 'none', cursor: 'pointer',
+            background: 'linear-gradient(135deg, #4a7dff 0%, #6ba3ff 100%)',
+            fontFamily: plusJakarta,
+          }}>
           Done
         </motion.button>
       </motion.div>
@@ -594,8 +666,11 @@ export default function KagelSessionOverlay({ session, week, onClose, onComplete
       <motion.div
         initial={{ y: '100%' }} animate={{ y: 0 }}
         transition={{ type: 'spring', damping: 30, stiffness: 280 }}
-        className="fixed inset-0 z-50 flex flex-col items-center justify-center"
-        style={{ background: '#080810' }}
+        style={{
+          position: 'fixed', inset: 0, zIndex: 50,
+          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+          background: '#131313',
+        }}
         onPointerDown={unlockAudio}>
         <AnimatePresence>
           {showTutorial && currentEx && (
@@ -605,21 +680,31 @@ export default function KagelSessionOverlay({ session, week, onClose, onComplete
         <motion.span key={countdown}
           initial={{ scale: 2, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.3 }}
-          style={{ fontSize: 96, fontWeight: 800, color: '#fff' }}>
+          style={{
+            fontSize: 96, fontWeight: 800, color: '#e5e2e1',
+            fontFamily: plusJakarta,
+          }}>
           {countdown > 0 ? countdown : 'Go!'}
         </motion.span>
-        <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.3)', marginTop: 12 }}>Get Ready</p>
+        <p style={{
+          fontSize: 14, color: '#8d90a2', marginTop: 12,
+          fontFamily: inter,
+        }}>Get Ready</p>
       </motion.div>
     )
   }
 
   // ── ACTIVE ──
-  // Layout: top bar → exercise name → [flex-1: ring+glow centered] → breathing text → controls at bottom
+  const exerciseLabel = meta.label || currentEx?.name || 'Long Hold'
+
   return (
     <motion.div
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex flex-col"
-      style={{ background: '#080810' }}
+      style={{
+        position: 'fixed', inset: 0, zIndex: 50,
+        display: 'flex', flexDirection: 'column',
+        background: '#131313',
+      }}
       onPointerDown={unlockAudio}>
 
       <AnimatePresence>
@@ -628,97 +713,199 @@ export default function KagelSessionOverlay({ session, week, onClose, onComplete
         )}
       </AnimatePresence>
 
-      {/* ── TOP: close + session title + mute ── */}
-      <div className="flex-shrink-0 flex items-center justify-between"
-        style={{
-          paddingTop: 'max(56px, calc(env(safe-area-inset-top) + 12px))',
-          paddingBottom: 4, paddingLeft: 20, paddingRight: 20,
+      {/* Scrollable content area */}
+      <div style={{
+        flex: 1, display: 'flex', flexDirection: 'column',
+        overflow: 'auto', WebkitOverflowScrolling: 'touch',
+        paddingTop: 'max(56px, calc(env(safe-area-inset-top) + 12px))',
+      }}>
+
+        {/* ── Main Card ── */}
+        <div style={{
+          margin: '0 16px',
+          background: '#201f1f',
+          borderRadius: 4,
+          minHeight: 527,
+          overflow: 'hidden',
+          position: 'relative',
+          display: 'flex',
+          flexDirection: 'column',
+          padding: '0 32px',
         }}>
-        <button onClick={onClose}
-          className="w-9 h-9 rounded-full flex items-center justify-center active:scale-90"
-          style={{ background: 'rgba(255,255,255,0.06)', color: '#6b7280', fontSize: 14 }}>✕</button>
-        <p style={{ fontSize: 11, fontWeight: 500, letterSpacing: '0.08em', color: 'rgba(255,255,255,0.25)' }}>
-          {session === 'morning' ? '☀️' : '🌙'} {session.toUpperCase()} · {week.label.split('·')[0].trim()}
-        </p>
-        <button onClick={() => setIsMuted(m => !m)}
-          className="w-9 h-9 rounded-full flex items-center justify-center active:scale-90"
-          style={{ background: 'rgba(255,255,255,0.06)', color: isMuted ? '#ef4444' : '#6b7280', fontSize: 16 }}>
-          {isMuted ? '🔇' : '🔊'}
-        </button>
-      </div>
+          {/* Gradient overlay */}
+          <div style={{
+            position: 'absolute', inset: 0,
+            background: 'linear-gradient(180deg, rgba(179,197,255,0.05) 0%, transparent 100%)',
+            opacity: 0.5,
+            pointerEvents: 'none',
+            borderRadius: 4,
+          }} />
 
-      {/* ── EXERCISE NAME + progress dots ── */}
-      <div className="flex-shrink-0 text-center" style={{ padding: '8px 20px 0' }}>
-        <AnimatePresence mode="wait">
-          <motion.div key={exIdx}
-            initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}>
-            <p style={{ fontSize: 16, fontWeight: 700, color: '#f9fafb' }}>{currentEx?.name}</p>
-            <p style={{ fontSize: 12, color: '#4b5563', marginTop: 3 }}>{currentEx?.cue}</p>
-          </motion.div>
-        </AnimatePresence>
-
-        {/* Progress dots */}
-        <div className="flex items-center justify-center gap-2" style={{ marginTop: 12 }}>
-          {exercises.map((_, i) => (
-            <motion.div key={i}
-              animate={{
-                width: i === exIdx ? 20 : 6,
-                background: i < exIdx ? '#10b981' : i === exIdx ? color : '#1f2937',
-              }}
-              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-              style={{ height: 6, borderRadius: 3 }} />
-          ))}
-        </div>
-      </div>
-
-      {/* ── CENTER: Ring + Glow (takes all remaining space) ── */}
-      <KagelVisual
-        isSqueeze={drillState.isSqueeze}
-        totalProgress={drillState.totalProgress}
-        totalTimeLeft={drillState.totalTimeLeft}
-        phaseLabel={drillState.phaseLabel}
-        color={color}
-      />
-
-      {/* ── BOTTOM ZONE: pinned to screen bottom ── */}
-      <div className="flex-shrink-0" style={{ background: '#080810' }}>
-
-        {/* Exercise tabs */}
-        <div className="overflow-x-auto" style={{ padding: '0 20px 8px', scrollbarWidth: 'none' }}>
-          <div className="flex gap-4 items-center" style={{ whiteSpace: 'nowrap' }}>
-            <button onClick={() => { setShowTutorial(true); setIsPaused(true) }}
-              className="flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center"
-              style={{ background: '#1a1a2e', color: '#4b5563', fontSize: 12 }}>?</button>
-            {exercises.map((ex, i) => (
-              <span key={i} style={{
-                fontSize: 13, fontWeight: i === exIdx ? 700 : 400,
-                color: i === exIdx ? '#fff' : i < exIdx ? '#2a2a3e' : '#3a3a4e',
+          {/* Top bar: X close + volume */}
+          <div style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            padding: '20px 0 0',
+            position: 'relative', zIndex: 2,
+          }}>
+            <button onClick={onClose}
+              style={{
+                width: 36, height: 36, borderRadius: '50%',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                background: 'rgba(255,255,255,0.06)', color: '#8d90a2', fontSize: 14,
+                border: 'none', cursor: 'pointer',
               }}>
-                {i < exIdx ? '✓ ' : ''}{ex.name}
-              </span>
-            ))}
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <path d="M1 1L13 13M13 1L1 13" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+            </button>
+            <button onClick={() => setIsMuted(m => !m)}
+              style={{
+                width: 36, height: 36, borderRadius: '50%',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                background: 'rgba(255,255,255,0.06)',
+                color: isMuted ? '#ef4444' : '#8d90a2', fontSize: 16,
+                border: 'none', cursor: 'pointer',
+              }}>
+              {isMuted ? (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                  <line x1="23" y1="9" x2="17" y2="15"/>
+                  <line x1="17" y1="9" x2="23" y2="15"/>
+                </svg>
+              ) : (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                  <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+                  <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                </svg>
+              )}
+            </button>
+          </div>
+
+          {/* Phase title: SQUEEZE or RELEASE */}
+          <div style={{
+            flex: 1, display: 'flex', flexDirection: 'column',
+            alignItems: 'center', justifyContent: 'center',
+            position: 'relative', zIndex: 2,
+            gap: 8,
+          }}>
+            <AnimatePresence mode="wait">
+              <motion.h1 key={drillState.isSqueeze ? 'squeeze' : 'release'}
+                initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
+                style={{
+                  fontFamily: plusJakarta, fontWeight: 800, fontSize: 48,
+                  color: '#e5e2e1', textAlign: 'center', textTransform: 'uppercase',
+                  letterSpacing: '-3.6px', margin: 0,
+                }}>
+                {drillState.isSqueeze ? 'SQUEEZE' : 'RELEASE'}
+              </motion.h1>
+            </AnimatePresence>
+
+            {/* Cue text */}
+            <AnimatePresence mode="wait">
+              <motion.p key={drillState.isSqueeze ? 'cue-sq' : 'cue-rel'}
+                initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }}
+                transition={{ duration: 0.15 }}
+                style={{
+                  fontFamily: plusJakarta, fontWeight: 400, fontSize: 14,
+                  color: 'rgba(255,255,255,0.7)', textAlign: 'center', margin: 0,
+                }}>
+                {drillState.isSqueeze ? 'Breathe out' : 'Breathe in, full release'}
+              </motion.p>
+            </AnimatePresence>
+
+            {/* Timer ring */}
+            <div style={{ marginTop: 16, marginBottom: 8 }}>
+              <TimerRing
+                isSqueeze={drillState.isSqueeze}
+                totalProgress={drillState.totalProgress}
+                totalTimeLeft={drillState.totalTimeLeft}
+              />
+            </div>
+
+            {/* Exercise type label */}
+            <span style={{
+              fontFamily: inter, fontWeight: 400, fontSize: 16,
+              color: 'rgba(255,255,255,0.8)',
+            }}>
+              {exerciseLabel}
+            </span>
           </div>
         </div>
 
-        {/* Controls: back / pause / forward */}
-        <div className="flex items-center gap-3"
-          style={{ padding: '0 20px', paddingBottom: 'env(safe-area-inset-bottom, 8px)' }}>
+        {/* ── Session Timeline ── */}
+        <div style={{ marginTop: 20 }}>
+          <SessionTimeline
+            exercises={exercises}
+            exIdx={exIdx}
+            drillProgress={drillState.totalProgress}
+          />
+        </div>
+
+        {/* ── Controls: back / pause / forward ── */}
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 12,
+          padding: '0 32px', marginBottom: 16,
+        }}>
           <button onClick={skipBack}
-            className="w-12 h-12 rounded-full flex items-center justify-center active:scale-90"
-            style={{ background: '#1a1a2e', color: '#6b7280', fontSize: 20 }}>‹</button>
-          <button onClick={() => { setIsPaused(p => !p); sounds.tap() }}
-            className="flex-1 h-12 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 active:scale-95"
             style={{
-              background: isPaused ? color : '#1a1a2e',
-              color: isPaused ? '#fff' : '#9ca3af',
-              border: isPaused ? 'none' : '1px solid #1f293733',
+              width: 48, height: 48, borderRadius: 6,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              background: '#353534', color: '#8d90a2', fontSize: 20,
+              border: 'none', cursor: 'pointer',
+            }}>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M10 3L5 8L10 13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+
+          <button onClick={() => { setIsPaused(p => !p); sounds.tap() }}
+            style={{
+              flex: 1, height: 48, borderRadius: 6,
+              fontWeight: 700, fontSize: 14,
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+              background: isPaused ? '#b3c5ff' : '#353534',
+              color: isPaused ? '#131313' : '#8d90a2',
+              border: 'none', cursor: 'pointer',
+              fontFamily: plusJakarta,
             }}>
             {isPaused ? '▶  Resume' : '⏸  Pause'}
           </button>
+
           <button onClick={skipForward}
-            className="w-12 h-12 rounded-full flex items-center justify-center active:scale-90"
-            style={{ background: '#1a1a2e', color: '#6b7280', fontSize: 20 }}>›</button>
+            style={{
+              width: 48, height: 48, borderRadius: 6,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              background: '#353534', color: '#8d90a2', fontSize: 20,
+              border: 'none', cursor: 'pointer',
+            }}>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M6 3L11 8L6 13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+        </div>
+
+        {/* ── Stats Grid ── */}
+        <StatsGrid
+          currentSet={exIdx + 1}
+          totalSets={exercises.length}
+          elapsedTime={totalElapsed}
+        />
+
+        {/* ── End Workout Button ── */}
+        <div style={{ padding: '0 32px', paddingBottom: 'max(24px, calc(env(safe-area-inset-bottom) + 12px))' }}>
+          <button onClick={onClose}
+            style={{
+              width: '100%', padding: '16px 0', borderRadius: 12,
+              fontWeight: 700, fontSize: 14, textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+              color: '#fff', border: 'none', cursor: 'pointer',
+              background: 'linear-gradient(135deg, #4a7dff 0%, #6ba3ff 100%)',
+              fontFamily: plusJakarta,
+            }}>
+            END WORKOUT
+          </button>
         </div>
       </div>
     </motion.div>

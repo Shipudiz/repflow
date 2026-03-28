@@ -50,7 +50,7 @@ export default function App() {
   return (
     <>
       {/* Screen area */}
-      <div className="relative flex-1 overflow-hidden">
+      <div className="relative flex-1 overflow-hidden" style={{ background: '#131313' }}>
         <AnimatePresence mode="wait">
           {tab === 'home' && (
             <motion.div key="home" className="absolute inset-0"
