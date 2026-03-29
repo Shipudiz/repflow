@@ -14,10 +14,18 @@ const CloseIcon = () => (
   </svg>
 )
 
-const VolumeIcon = () => (
+const VolumeOnIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
     <path d="M11 5L6 9H2v6h4l5 4V5z" stroke="#8d90a2" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
     <path d="M15.54 8.46a5 5 0 010 7.07M19.07 4.93a10 10 0 010 14.14" stroke="#8d90a2" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+)
+
+const VolumeOffIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+    <path d="M11 5L6 9H2v6h4l5 4V5z" stroke="#8d90a2" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    <line x1="23" y1="9" x2="17" y2="15" stroke="#8d90a2" strokeWidth="1.5" strokeLinecap="round" />
+    <line x1="17" y1="9" x2="23" y2="15" stroke="#8d90a2" strokeWidth="1.5" strokeLinecap="round" />
   </svg>
 )
 
@@ -63,6 +71,7 @@ export default function WorkoutPlayer({ workout, onClose, onComplete }) {
   const [phase, setPhase] = useState(PHASE.COUNTDOWN)
   const [isPaused, setIsPaused] = useState(false)
   const [totalElapsed, setTotalElapsed] = useState(0)
+  const [isMuted, setIsMuted] = useState(sounds.isMuted())
   const elapsedRef = useRef(null)
 
   const exercises = workout.exercises
@@ -248,11 +257,17 @@ export default function WorkoutPlayer({ workout, onClose, onComplete }) {
             }}>
             <CloseIcon />
           </button>
-          <button style={{
-            background: 'none', border: 'none', cursor: 'pointer',
-            padding: 4, display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}>
-            <VolumeIcon />
+          <button
+            onClick={() => {
+              const newMuted = !isMuted
+              sounds.setMuted(newMuted)
+              setIsMuted(newMuted)
+            }}
+            style={{
+              background: 'none', border: 'none', cursor: 'pointer',
+              padding: 4, display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+            {isMuted ? <VolumeOffIcon /> : <VolumeOnIcon />}
           </button>
         </div>
 
@@ -284,7 +299,15 @@ export default function WorkoutPlayer({ workout, onClose, onComplete }) {
               width: 168, height: 122, margin: '0 auto 16px',
               position: 'relative', zIndex: 1,
             }}>
-            <ExerciseAnimation animType={phase === PHASE.REST && nextEx ? nextEx.anim : current.anim} color={workout.color} />
+            {(phase === PHASE.REST && nextEx?.gif || current.gif) ? (
+              <img
+                src={phase === PHASE.REST && nextEx ? nextEx.gif : current.gif}
+                alt={phase === PHASE.REST && nextEx ? nextEx.name : current.name}
+                style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: 6 }}
+              />
+            ) : (
+              <ExerciseAnimation animType={phase === PHASE.REST && nextEx ? nextEx.anim : current.anim} color={workout.color} />
+            )}
           </motion.div>
         </AnimatePresence>
 

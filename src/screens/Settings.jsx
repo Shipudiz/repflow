@@ -79,9 +79,11 @@ function WeeklyMomentumChart({ completedWorkouts = [] }) {
       const dayWorkouts = completedWorkouts.filter(
         w => new Date(w.date).toDateString() === dateStr
       )
-      // Sum up durations in minutes
-      const totalMinutes = dayWorkouts.reduce((sum, w) => sum + (w.duration || 0), 0)
-      return { label, totalMinutes, count: dayWorkouts.length, isSaturday: i === 5, isSunday: i === 6 }
+      // Sum up durations in minutes (data stores durationSec)
+      const totalMinutes = dayWorkouts.reduce((sum, w) => sum + ((w.durationSec || 0) / 60), 0)
+      // If workouts exist but duration is 0, show at least count * 10 min estimate
+      const displayMinutes = totalMinutes > 0 ? totalMinutes : dayWorkouts.length * 10
+      return { label, totalMinutes: displayMinutes, count: dayWorkouts.length, isSaturday: i === 5, isSunday: i === 6 }
     })
   }, [completedWorkouts])
 
@@ -94,8 +96,8 @@ function WeeklyMomentumChart({ completedWorkouts = [] }) {
     wd.setHours(0, 0, 0, 0)
     return wd >= monday
   })
-  const totalDuration = allWorkouts.reduce((sum, w) => sum + (w.duration || 0), 0)
-  const avgSeconds = allWorkouts.length > 0 ? Math.round((totalDuration / allWorkouts.length) * 60) : 2535
+  const totalDurationSec = allWorkouts.reduce((sum, w) => sum + (w.durationSec || 0), 0)
+  const avgSeconds = allWorkouts.length > 0 ? Math.round(totalDurationSec / allWorkouts.length) : 0
   const avgMin = Math.floor(avgSeconds / 60)
   const avgSec = avgSeconds % 60
 
@@ -212,48 +214,55 @@ export default function Settings({ settings, onUpdate, requestPermission }) {
     }
   }
 
-  const toggle = (key) => onUpdate({ [key]: !settings[key] })
   const isUnsupported = notifStatus === 'unsupported'
 
-  // Reminder rows configuration
-  const reminderRows = [
-    {
-      key: 'morningKegel',
-      label: 'Morning Kegel',
-      time: settings.morningTime || '10:00',
-      timeKey: 'morningTime',
-      schedule: 'Everyday',
-      enabled: settings.morningKegelEnabled !== false && settings.notificationsEnabled,
-      toggleKey: 'morningKegelEnabled',
-    },
-    {
-      key: 'eveningKegel',
-      label: 'Evening Kegel',
-      time: settings.eveningTime || '18:00',
-      timeKey: 'eveningTime',
-      schedule: 'Everyday',
-      enabled: settings.eveningKegelEnabled !== false && settings.notificationsEnabled,
-      toggleKey: 'eveningKegelEnabled',
-    },
-    {
-      key: 'absWorkout',
-      label: 'Abs Workout',
-      time: settings.absTime || '19:00',
-      timeKey: 'absTime',
-      schedule: 'Sun Tue Thu',
-      enabled: settings.absWorkoutEnabled !== false && settings.notificationsEnabled,
-      toggleKey: 'absWorkoutEnabled',
-    },
-    {
-      key: 'fullBody',
-      label: 'Full Body',
-      time: settings.fullBodyTime || '19:30',
-      timeKey: 'fullBodyTime',
-      schedule: 'Mon Wed',
-      enabled: settings.fullBodyEnabled !== false && settings.notificationsEnabled,
-      toggleKey: 'fullBodyEnabled',
-    },
+  // Dynamic reminders stored in settings
+  const reminders = settings.reminders || [
+    { id: 'morningKegel', label: 'Morning Kegel', time: '10:00', days: [0,1,2,3,4,5,6], enabled: true },
+    { id: 'eveningKegel', label: 'Evening Kegel', time: '18:00', days: [0,1,2,3,4,5,6], enabled: true },
+    { id: 'absWorkout', label: 'Abs Workout', time: '19:00', days: [0,2,4], enabled: true },
   ]
+
+  const DAY_LABELS = ['S','M','T','W','T','F','S']
+
+  const WORKOUT_OPTIONS = [
+    'Morning Kegel', 'Evening Kegel', 'Abs Workout', 'Daily Routine', '12 Steps', 'Full Body',
+  ]
+  // Filter out already-used labels
+  const availableOptions = WORKOUT_OPTIONS.filter(
+    opt => !reminders.some(r => r.label === opt)
+  )
+
+  const updateReminders = (updated) => onUpdate({ reminders: updated })
+
+  const addReminder = () => {
+    if (availableOptions.length === 0) return
+    const newReminder = {
+      id: `reminder-${Date.now()}`,
+      label: availableOptions[0],
+      time: '19:00',
+      days: [0,1,2,3,4,5,6],
+      enabled: true,
+    }
+    updateReminders([...reminders, newReminder])
+  }
+
+  const removeReminder = (id) => {
+    updateReminders(reminders.filter(r => r.id !== id))
+  }
+
+  const updateReminder = (id, patch) => {
+    updateReminders(reminders.map(r => r.id === id ? { ...r, ...patch } : r))
+  }
+
+  const toggleDay = (id, dayIdx) => {
+    const reminder = reminders.find(r => r.id === id)
+    if (!reminder) return
+    const days = reminder.days.includes(dayIdx)
+      ? reminder.days.filter(d => d !== dayIdx)
+      : [...reminder.days, dayIdx].sort()
+    updateReminder(id, { days })
+  }
 
   // Calculate streak
   const streakDays = settings.streakDays || 0
@@ -266,12 +275,6 @@ export default function Settings({ settings, onUpdate, requestPermission }) {
   // Streak bubbles: 10 circles, filled for completed days
   const streakBubbleCount = 10
   const filledBubbles = Math.min(streakDays % streakBubbleCount || (streakDays > 0 ? streakBubbleCount : 0), streakBubbleCount)
-
-  // Format time for display (HH:MM -> "10:00" style large text)
-  const formatTimeDisplay = (time) => {
-    const [h, m] = (time || '00:00').split(':')
-    return `${h}:${m}`
-  }
 
   return (
     <div className="scroll-area" style={{ paddingBottom: 110 }}>
@@ -374,66 +377,148 @@ export default function Settings({ settings, onUpdate, requestPermission }) {
           </div>
         ) : (
           <div>
-            {reminderRows.map((row, idx) => (
-              <div key={row.key}>
+            {reminders.map((row, idx) => (
+              <div key={row.id}>
                 {idx > 0 && (
                   <div style={{ height: 1, background: '#404040', opacity: 0.3, margin: '16px 0' }} />
                 )}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
                   {/* Toggle */}
-                  <Toggle
-                    value={row.enabled}
-                    onToggle={() => {
-                      if (!settings.notificationsEnabled) {
-                        onUpdate({ notificationsEnabled: true, [row.toggleKey]: true })
-                      } else {
-                        onUpdate({ [row.toggleKey]: !row.enabled })
-                      }
+                  <div style={{ paddingTop: 6 }}>
+                    <Toggle
+                      value={row.enabled}
+                      onToggle={() => updateReminder(row.id, { enabled: !row.enabled })}
+                    />
+                  </div>
+
+                  {/* Workout selector + day pills + time */}
+                  <div style={{ flex: 1 }}>
+                    {/* Workout selector dropdown */}
+                    <select
+                      value={row.label}
+                      onChange={e => updateReminder(row.id, { label: e.target.value })}
+                      style={{
+                        background: '#131313',
+                        border: 'none',
+                        borderRadius: 6,
+                        padding: '8px 12px',
+                        fontFamily: "'Inter', sans-serif",
+                        fontWeight: 500,
+                        fontSize: 14,
+                        color: '#e5e2e1',
+                        width: '100%',
+                        marginBottom: 8,
+                        cursor: 'pointer',
+                        appearance: 'none',
+                        WebkitAppearance: 'none',
+                        backgroundImage: `url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%238d90a2' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E")`,
+                        backgroundRepeat: 'no-repeat',
+                        backgroundPosition: 'right 12px center',
+                        paddingRight: 32,
+                      }}
+                    >
+                      <option value={row.label}>{row.label}</option>
+                      {availableOptions.filter(o => o !== row.label).map(opt => (
+                        <option key={opt} value={opt}>{opt}</option>
+                      ))}
+                    </select>
+
+                    {/* Day pills */}
+                    <div style={{ display: 'flex', gap: 4, marginBottom: 8 }}>
+                      {DAY_LABELS.map((label, dayIdx) => {
+                        const isSelected = row.days.includes(dayIdx)
+                        return (
+                          <button key={dayIdx}
+                            onClick={() => toggleDay(row.id, dayIdx)}
+                            style={{
+                              width: 28, height: 28, borderRadius: 14,
+                              background: isSelected ? '#005be6' : '#353534',
+                              border: 'none',
+                              fontFamily: "'Inter', sans-serif",
+                              fontWeight: 600, fontSize: 10,
+                              color: isSelected ? '#fff' : '#8d90a2',
+                              cursor: 'pointer',
+                              padding: 0,
+                            }}
+                          >
+                            {label}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Time picker */}
+                  <input
+                    type="time"
+                    value={row.time}
+                    onChange={e => updateReminder(row.id, { time: e.target.value })}
+                    style={{
+                      background: '#131313',
+                      border: 'none',
+                      borderRadius: 6,
+                      padding: '6px 8px',
+                      fontFamily: "'Plus Jakarta Sans', sans-serif",
+                      fontWeight: 500,
+                      fontSize: 20,
+                      color: '#e5e2e1',
+                      flexShrink: 0,
+                      width: 90,
+                      cursor: 'pointer',
+                      colorScheme: 'dark',
                     }}
                   />
 
-                  {/* Label + schedule */}
-                  <div style={{ flex: 1 }}>
-                    <div style={{
-                      background: '#131313',
-                      border: '1px solid #404040',
-                      borderRadius: 8,
-                      padding: '8px 12px',
-                      width: 120,
-                      marginBottom: 4,
-                    }}>
-                      <span style={{
-                        fontFamily: "'Inter', sans-serif",
-                        fontWeight: 400,
-                        fontSize: 14,
-                        color: '#bababa',
-                      }}>
-                        {row.label}
-                      </span>
-                    </div>
-                    <span style={{
-                      fontFamily: "'Inter', sans-serif",
-                      fontWeight: 400,
-                      fontSize: 11,
-                      color: '#bababa',
-                    }}>
-                      {row.schedule}
-                    </span>
-                  </div>
-
-                  {/* Time display */}
-                  <span style={{
-                    fontFamily: "'Plus Jakarta Sans', sans-serif",
-                    fontWeight: 400,
-                    fontSize: 30,
-                    color: '#bababa',
-                    flexShrink: 0,
-                  }}>
-                    {formatTimeDisplay(row.time)}
-                  </span>
+                  {/* Delete button */}
+                  <motion.button
+                    whileTap={{ scale: 0.8 }}
+                    onClick={() => removeReminder(row.id)}
+                    style={{
+                      width: 28, height: 28, borderRadius: 14,
+                      background: 'rgba(204,13,17,0.15)',
+                      border: 'none', cursor: 'pointer',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      flexShrink: 0, marginTop: 6,
+                    }}
+                  >
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                      <path d="M2 2L10 10M10 2L2 10" stroke="#ffb4aa" strokeWidth="1.5" strokeLinecap="round" />
+                    </svg>
+                  </motion.button>
                 </div>
               </div>
             ))}
+
+            {/* Add new reminder button */}
+            {availableOptions.length > 0 && (
+              <motion.button
+                whileTap={{ scale: 0.97 }}
+                onClick={addReminder}
+                style={{
+                  width: '100%',
+                  marginTop: 20,
+                  padding: '12px 0',
+                  background: 'rgba(0,91,230,0.15)',
+                  border: 'none',
+                  borderRadius: 8,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                  cursor: 'pointer',
+                }}
+              >
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <path d="M8 3V13M3 8H13" stroke="#b3c5ff" strokeWidth="2" strokeLinecap="round" />
+                </svg>
+                <span style={{
+                  fontFamily: "'Inter', sans-serif",
+                  fontWeight: 600, fontSize: 13,
+                  color: '#b3c5ff',
+                  textTransform: 'uppercase',
+                  letterSpacing: 0.8,
+                }}>
+                  Add Reminder
+                </span>
+              </motion.button>
+            )}
           </div>
         )}
       </motion.div>

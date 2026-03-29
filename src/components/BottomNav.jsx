@@ -22,11 +22,11 @@ export default function BottomNav({ active, onChange }) {
       WebkitBackdropFilter: 'blur(12px)',
       borderTop: '1px solid rgba(229, 226, 225, 0.1)',
       boxShadow: '0px -8px 32px rgba(179, 197, 255, 0.06)',
-      paddingTop: 12,
+      paddingTop: 16,
       paddingBottom: 'calc(11px + env(safe-area-inset-bottom, 0px))',
       paddingLeft: 40,
       paddingRight: 40,
-      height: 90,
+      height: 92,
       boxSizing: 'border-box',
       display: 'flex',
       justifyContent: 'space-between',
@@ -56,7 +56,9 @@ export default function BottomNav({ active, onChange }) {
             role="tab"
             aria-selected={isActive}
           >
-            <Icon size={30} active={isActive} />
+            <div style={{ width: 30, height: 30, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Icon size={28} active={isActive} />
+            </div>
 
             <span style={{
               fontFamily: "'Plus Jakarta Sans', sans-serif",
@@ -81,19 +83,19 @@ export default function BottomNav({ active, onChange }) {
 function HomeIcon({ size, active }) {
   return (
     <svg width={size} height={size} viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
-      {/* Grid/house icon — 2x2 grid with a roofline feel */}
-      <rect x="4" y="4" width="10" height="10" rx="2"
-        stroke="currentColor" strokeWidth={active ? 2.2 : 1.8}
-        fill={active ? 'rgba(255,255,255,0.1)' : 'none'} />
-      <rect x="16" y="4" width="10" height="10" rx="2"
-        stroke="currentColor" strokeWidth={active ? 2.2 : 1.8}
-        fill={active ? 'rgba(255,255,255,0.1)' : 'none'} />
-      <rect x="4" y="16" width="10" height="10" rx="2"
-        stroke="currentColor" strokeWidth={active ? 2.2 : 1.8}
-        fill={active ? 'rgba(255,255,255,0.1)' : 'none'} />
-      <rect x="16" y="16" width="10" height="10" rx="2"
-        stroke="currentColor" strokeWidth={active ? 2.2 : 1.8}
-        fill={active ? 'rgba(255,255,255,0.1)' : 'none'} />
+      {/* 2x2 grid — matches Figma nav */}
+      <rect x="3" y="3" width="11" height="11" rx="2.5"
+        fill={active ? 'currentColor' : 'none'}
+        stroke="currentColor" strokeWidth={1.8} />
+      <rect x="16" y="3" width="11" height="11" rx="2.5"
+        fill={active ? 'currentColor' : 'none'}
+        stroke="currentColor" strokeWidth={1.8} />
+      <rect x="3" y="16" width="11" height="11" rx="2.5"
+        fill={active ? 'currentColor' : 'none'}
+        stroke="currentColor" strokeWidth={1.8} />
+      <rect x="16" y="16" width="11" height="11" rx="2.5"
+        fill={active ? 'currentColor' : 'none'}
+        stroke="currentColor" strokeWidth={1.8} />
     </svg>
   )
 }
@@ -101,20 +103,19 @@ function HomeIcon({ size, active }) {
 function LibraryIcon({ size, active }) {
   return (
     <svg width={size} height={size} viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
-      {/* Crosshair/compass icon */}
-      <circle cx="15" cy="15" r="10"
-        stroke="currentColor" strokeWidth={active ? 2.2 : 1.8} />
-      <circle cx="15" cy="15" r="3"
-        stroke="currentColor" strokeWidth={active ? 2.2 : 1.8}
+      {/* Dumbbell icon — matches Figma nav */}
+      <rect x="4" y="10" width="6" height="10" rx="1.5"
+        stroke="currentColor" strokeWidth={1.8}
         fill={active ? 'rgba(255,255,255,0.1)' : 'none'} />
-      <line x1="15" y1="2" x2="15" y2="7"
-        stroke="currentColor" strokeWidth={active ? 2.2 : 1.8} strokeLinecap="round" />
-      <line x1="15" y1="23" x2="15" y2="28"
-        stroke="currentColor" strokeWidth={active ? 2.2 : 1.8} strokeLinecap="round" />
-      <line x1="2" y1="15" x2="7" y2="15"
-        stroke="currentColor" strokeWidth={active ? 2.2 : 1.8} strokeLinecap="round" />
-      <line x1="23" y1="15" x2="28" y2="15"
-        stroke="currentColor" strokeWidth={active ? 2.2 : 1.8} strokeLinecap="round" />
+      <rect x="20" y="10" width="6" height="10" rx="1.5"
+        stroke="currentColor" strokeWidth={1.8}
+        fill={active ? 'rgba(255,255,255,0.1)' : 'none'} />
+      <line x1="10" y1="15" x2="20" y2="15"
+        stroke="currentColor" strokeWidth={2} strokeLinecap="round" />
+      <line x1="1" y1="15" x2="4" y2="15"
+        stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" />
+      <line x1="26" y1="15" x2="29" y2="15"
+        stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" />
     </svg>
   )
 }

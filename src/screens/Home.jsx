@@ -159,8 +159,13 @@ function PlayIcon() {
 
 export default function Home({ settings, onStartWorkout, onStartKegel, onNavigate }) {
   const currentWeekData = KEGEL_WEEKS.find(w => w.week === settings.kegelWeek) || KEGEL_WEEKS[0]
-  const streak = settings.streakDays || 0
   const today = new Date().toDateString()
+  const yesterdayStr = new Date(Date.now() - 86400000).toDateString()
+  const lastDate = settings.lastWorkoutDate
+  // If last workout was today or yesterday, streak is alive; otherwise reset to 0
+  const streak = (lastDate === today || lastDate === yesterdayStr)
+    ? (settings.streakDays || 0)
+    : 0
   const todayWorkouts = (settings.completedWorkouts || []).filter(w => new Date(w.date).toDateString() === today)
   const smartSession = getSmartSession(todayWorkouts)
 
@@ -408,15 +413,21 @@ export default function Home({ settings, onStartWorkout, onStartKegel, onNavigat
                     cursor: 'pointer',
                   }}
                 >
-                  {/* Thumbnail placeholder */}
+                  {/* Thumbnail */}
                   <div style={{
                     width: 80, height: 80, borderRadius: 4,
                     background: T.track,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: 28, flexShrink: 0,
-                    filter: 'saturate(0.3)',
+                    overflow: 'hidden',
+                    flexShrink: 0,
                   }}>
-                    {w.emoji}
+                    {w.thumb ? (
+                      <img src={w.thumb} alt={w.title}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    ) : (
+                      <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28 }}>
+                        {w.emoji}
+                      </div>
+                    )}
                   </div>
 
                   <div style={{ flex: 1, minWidth: 0 }}>
