@@ -80,12 +80,33 @@ export function useNotifications(settings, onUpdate) {
     }
   }, [])
 
+  // Serialize PushSubscription safely (iOS Safari compat)
+  const serializeSub = (sub) => {
+    if (!sub) return null
+    // Try toJSON first (works on Chrome/Firefox), fall back to manual extraction
+    try {
+      const json = sub.toJSON()
+      if (json && json.endpoint && json.keys) return json
+    } catch {}
+    // Manual extraction for iOS Safari
+    const arrayToBase64url = (buffer) => {
+      const bytes = new Uint8Array(buffer)
+      let str = ''
+      for (const b of bytes) str += String.fromCharCode(b)
+      return btoa(str).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+    }
+    const keys = sub.getKey
+      ? { p256dh: arrayToBase64url(sub.getKey('p256dh')), auth: arrayToBase64url(sub.getKey('auth')) }
+      : {}
+    return { endpoint: sub.endpoint, keys }
+  }
+
   // Sync reminders to backend whenever they change
   const syncReminders = async (subscription, reminders) => {
     await fetch(`${API_BASE}/subscribe`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ subscription, reminders }),
+      body: JSON.stringify({ subscription: serializeSub(subscription), reminders }),
     })
   }
 

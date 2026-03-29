@@ -306,28 +306,22 @@ export default function Settings({ settings, onUpdate, subscribe, unsubscribe, g
     setTestingPush(true)
     setTestResult('')
     try {
-      const sub = await getSubscription()
-      if (!sub) {
-        setTestResult('No subscription found')
-        setTestingPush(false)
-        return
-      }
       const resp = await fetch('/api/test-push', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ subscription: sub.toJSON() }),
+        body: JSON.stringify({}),
       })
       const data = await resp.json()
       if (data.sent) {
-        setTestResult('Sent! Check your notifications')
+        setTestResult('Sent! Check notifications')
       } else {
-        setTestResult(`Error: ${data.error || 'Unknown'}`)
+        setTestResult(data.error || 'No subscription found')
       }
     } catch (err) {
       setTestResult(`Failed: ${err.message}`)
     }
     setTestingPush(false)
-    setTimeout(() => setTestResult(''), 4000)
+    setTimeout(() => setTestResult(''), 5000)
   }
 
   // Dynamic reminders stored in settings

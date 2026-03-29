@@ -19,38 +19,41 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end()
 
   try {
-    const { subscription } = req.body
-    if (!subscription || !subscription.endpoint) {
-      return res.status(400).json({ error: 'Missing subscription in request body' })
+    // Find all stored subscriptions in Redis and send test to all
+    const keys = await redis.keys('sub:*')
+    if (!keys.length) {
+      return res.status(404).json({ error: 'No subscriptions stored in Redis. Try toggling notifications off and on.' })
     }
 
-    // Try sending directly with the subscription from the request
-    await webpush.sendNotification(
-      subscription,
-      JSON.stringify({
-        title: 'Shipud Flow',
-        body: 'Push notifications are working!',
-        icon: '/icon-192.png',
-        badge: '/icon-192.png',
-        tag: 'test',
-      })
-    )
+    const results = []
+    for (const key of keys) {
+      const raw = await redis.get(key)
+      const data = typeof raw === 'string' ? JSON.parse(raw) : raw
+      if (!data?.subscription) continue
 
-    // Also check what's stored in Redis
-    const subKey = Buffer.from(subscription.endpoint).toString('base64url').slice(0, 32)
-    const stored = await redis.get(`sub:${subKey}`)
+      try {
+        await webpush.sendNotification(
+          data.subscription,
+          JSON.stringify({
+            title: 'Shipud Flow',
+            body: 'Push notifications are working!',
+            icon: '/icon-192.png',
+            badge: '/icon-192.png',
+            tag: 'test',
+          })
+        )
+        results.push({ key, sent: true })
+      } catch (pushErr) {
+        results.push({ key, error: pushErr.message, statusCode: pushErr.statusCode })
+        if (pushErr.statusCode === 410) {
+          await redis.del(key)
+        }
+      }
+    }
 
-    return res.status(200).json({
-      sent: true,
-      storedInRedis: !!stored,
-      subKeyUsed: subKey,
-    })
+    return res.status(200).json({ sent: results.some(r => r.sent), results })
   } catch (err) {
     console.error('Test push error:', err)
-    return res.status(500).json({
-      error: err.message,
-      statusCode: err.statusCode,
-      body: err.body,
-    })
+    return res.status(500).json({ error: err.message })
   }
 }
