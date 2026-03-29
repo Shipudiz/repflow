@@ -9,6 +9,9 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
+      strategies: 'injectManifest',
+      srcDir: 'src',
+      filename: 'sw.js',
       includeAssets: ['favicon.ico'],
       manifest: {
         name: 'RepFlow – Daily Workout Trainer',
@@ -25,11 +28,8 @@ export default defineConfig({
           { src: 'icon-512.png', sizes: '512x512', type: 'image/png' }
         ]
       },
-      workbox: {
+      injectManifest: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
-        skipWaiting: true,
-        clientsClaim: true,
-        // Don't precache large GIF assets — they'll be cached on demand
         globIgnores: ['**/workouts/**/*.gif'],
       },
       devOptions: { enabled: true }

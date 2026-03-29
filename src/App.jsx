@@ -17,7 +17,7 @@ export default function App() {
   const [settings, setSettings] = useLocalStorage('repflow-settings', DEFAULT_SETTINGS)
 
   const updateSettings = (patch) => setSettings(prev => ({ ...prev, ...patch }))
-  const { requestPermission } = useNotifications(settings, updateSettings)
+  const { subscribe, unsubscribe, getSubscription } = useNotifications(settings, updateSettings)
 
   const recordWorkout = (workoutId, durationSec = 0) => {
     const today = new Date().toDateString()
@@ -78,7 +78,9 @@ export default function App() {
               <Settings
                 settings={settings}
                 onUpdate={updateSettings}
-                requestPermission={requestPermission}
+                subscribe={subscribe}
+                unsubscribe={unsubscribe}
+                getSubscription={getSubscription}
               />
             </motion.div>
           )}

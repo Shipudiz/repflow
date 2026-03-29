@@ -1,14 +1,9 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import { motion } from 'framer-motion'
 
-// Safe Notification permission check — iOS Safari doesn't have this API
-function getNotifPermission() {
-  try {
-    if (typeof Notification === 'undefined') return 'unsupported'
-    return Notification.permission || 'default'
-  } catch {
-    return 'unsupported'
-  }
+// Check push support — works on iOS PWA (16.4+) and all modern browsers
+function checkPushSupport() {
+  return 'serviceWorker' in navigator && 'PushManager' in window
 }
 
 // ─── Inline Toggle Switch ───────────────────────────────────────────────────
@@ -200,27 +195,44 @@ function WeeklyMomentumChart({ completedWorkouts = [] }) {
 }
 
 // ─── Main Settings Component ────────────────────────────────────────────────
-export default function Settings({ settings, onUpdate, requestPermission }) {
-  const [notifStatus, setNotifStatus] = useState(getNotifPermission)
+export default function Settings({ settings, onUpdate, subscribe, unsubscribe, getSubscription }) {
+  const [pushState, setPushState] = useState('loading') // loading | unsupported | unsubscribed | subscribed | denied
+  const [subscribing, setSubscribing] = useState(false)
 
-  const handleEnableNotifications = async () => {
-    try {
-      const granted = await requestPermission()
-      const status = granted ? 'granted' : 'denied'
-      setNotifStatus(status)
-      if (granted) onUpdate({ notificationsEnabled: true })
-    } catch {
-      setNotifStatus('denied')
+  // Check current push subscription status on mount
+  useEffect(() => {
+    if (!checkPushSupport()) {
+      setPushState('unsupported')
+      return
     }
+    getSubscription().then(sub => {
+      setPushState(sub ? 'subscribed' : 'unsubscribed')
+    })
+  }, [getSubscription])
+
+  const handleSubscribe = async () => {
+    setSubscribing(true)
+    const result = await subscribe()
+    if (result.ok) {
+      setPushState('subscribed')
+      onUpdate({ notificationsEnabled: true })
+    } else if (result.reason?.includes('denied')) {
+      setPushState('denied')
+    }
+    setSubscribing(false)
   }
 
-  const isUnsupported = notifStatus === 'unsupported'
+  const handleUnsubscribe = async () => {
+    await unsubscribe()
+    setPushState('unsubscribed')
+    onUpdate({ notificationsEnabled: false })
+  }
 
   // Dynamic reminders stored in settings
   const reminders = settings.reminders || [
-    { id: 'morningKegel', label: 'Morning Kegel', time: '10:00', days: [0,1,2,3,4,5,6], enabled: true },
-    { id: 'eveningKegel', label: 'Evening Kegel', time: '18:00', days: [0,1,2,3,4,5,6], enabled: true },
-    { id: 'absWorkout', label: 'Abs Workout', time: '19:00', days: [0,2,4], enabled: true },
+    { id: 'morningKegel', label: 'Morning Kegel', body: 'Time for your morning pelvic floor session', time: '10:00', days: [0,1,2,3,4,5,6], enabled: true },
+    { id: 'eveningKegel', label: 'Evening Kegel', body: "Don't forget your evening session!", time: '18:00', days: [0,1,2,3,4,5,6], enabled: true },
+    { id: 'absWorkout', label: 'Abs Workout', body: 'Time to hit the abs!', time: '19:00', days: [0,2,4], enabled: true },
   ]
 
   const DAY_LABELS = ['S','M','T','W','T','F','S']
@@ -240,6 +252,7 @@ export default function Settings({ settings, onUpdate, requestPermission }) {
     const newReminder = {
       id: `reminder-${Date.now()}`,
       label: availableOptions[0],
+      body: 'Time for your workout!',
       time: '19:00',
       days: [0,1,2,3,4,5,6],
       enabled: true,
@@ -336,16 +349,21 @@ export default function Settings({ settings, onUpdate, requestPermission }) {
         </div>
 
         {/* Notification permission handling */}
-        {isUnsupported ? (
+        {pushState === 'unsupported' ? (
           <p style={{
             fontFamily: "'Inter', sans-serif",
             fontSize: 14,
             color: '#8d90a2',
             margin: 0,
+            lineHeight: 1.5,
           }}>
-            Notifications are not supported in this browser. On iOS, install the app to your home screen first.
+            Push notifications require installing this app to your home screen. On iPhone: tap Share → Add to Home Screen, then open from there.
           </p>
-        ) : notifStatus !== 'granted' ? (
+        ) : pushState === 'loading' ? (
+          <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 14, color: '#8d90a2', margin: 0 }}>
+            Checking notification status...
+          </p>
+        ) : pushState !== 'subscribed' ? (
           <div>
             <p style={{
               fontFamily: "'Inter', sans-serif",
@@ -354,26 +372,31 @@ export default function Settings({ settings, onUpdate, requestPermission }) {
               marginBottom: 16,
               lineHeight: 1.5,
             }}>
-              Enable notifications to set workout reminders.
+              {pushState === 'denied'
+                ? 'Notifications were blocked. Open your device settings to allow them for this app.'
+                : 'Enable push notifications to get workout reminders — even when the app is closed.'}
             </p>
-            <button
-              onClick={handleEnableNotifications}
-              disabled={notifStatus === 'denied'}
-              style={{
-                width: '100%',
-                padding: '14px 0',
-                borderRadius: 8,
-                border: 'none',
-                fontFamily: "'Inter', sans-serif",
-                fontWeight: 600,
-                fontSize: 14,
-                cursor: notifStatus === 'denied' ? 'not-allowed' : 'pointer',
-                background: notifStatus === 'denied' ? '#353534' : '#005be6',
-                color: notifStatus === 'denied' ? '#8d90a2' : '#ffffff',
-              }}
-            >
-              {notifStatus === 'denied' ? 'Blocked — Enable in Browser Settings' : 'Enable Notifications'}
-            </button>
+            {pushState !== 'denied' && (
+              <button
+                onClick={handleSubscribe}
+                disabled={subscribing}
+                style={{
+                  width: '100%',
+                  padding: '14px 0',
+                  borderRadius: 8,
+                  border: 'none',
+                  fontFamily: "'Inter', sans-serif",
+                  fontWeight: 600,
+                  fontSize: 14,
+                  cursor: 'pointer',
+                  background: '#005be6',
+                  color: '#ffffff',
+                  opacity: subscribing ? 0.7 : 1,
+                }}
+              >
+                {subscribing ? 'Enabling...' : 'Enable Push Notifications'}
+              </button>
+            )}
           </div>
         ) : (
           <div>
@@ -519,6 +542,25 @@ export default function Settings({ settings, onUpdate, requestPermission }) {
                 </span>
               </motion.button>
             )}
+
+            {/* Disable notifications */}
+            <button
+              onClick={handleUnsubscribe}
+              style={{
+                width: '100%',
+                marginTop: 12,
+                padding: '10px 0',
+                background: 'none',
+                border: 'none',
+                fontFamily: "'Inter', sans-serif",
+                fontWeight: 500,
+                fontSize: 12,
+                color: '#8d90a2',
+                cursor: 'pointer',
+              }}
+            >
+              Disable push notifications
+            </button>
           </div>
         )}
       </motion.div>
