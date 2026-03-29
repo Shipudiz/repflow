@@ -3,6 +3,14 @@ import { useEffect, useCallback, useRef } from 'react'
 const VAPID_PUBLIC_KEY = 'BJdPGgfc83VfDNmCIOketX-HvT3AUosLizS51-DwEDrhRrGlOVRRpVpjuF8-R8U66hn3ekPJY8S5Y4WYZnsqPa0'
 const API_BASE = '/api'
 
+// Convert VAPID key from base64url to Uint8Array (required by Safari)
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4)
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/')
+  const raw = atob(base64)
+  return Uint8Array.from([...raw].map(c => c.charCodeAt(0)))
+}
+
 // Serialize PushSubscription safely (iOS Safari compat)
 function serializeSub(sub) {
   if (!sub) return null
@@ -42,9 +50,18 @@ export function useNotifications(settings, onUpdate) {
     }
 
     try {
-      const permission = await Notification.requestPermission()
-      if (permission !== 'granted') {
-        return { ok: false, reason: 'Permission denied' }
+      // On iOS Safari PWA, Notification.requestPermission() throws
+      // "The string did not match the expected pattern".
+      // pushManager.subscribe() handles the permission prompt natively on iOS.
+      if ('Notification' in window) {
+        try {
+          const permission = await Notification.requestPermission()
+          if (permission === 'denied') {
+            return { ok: false, reason: 'Permission denied' }
+          }
+        } catch {
+          // iOS throws here — fall through, pushManager.subscribe will handle it
+        }
       }
 
       const registration = await navigator.serviceWorker.ready
@@ -57,7 +74,7 @@ export function useNotifications(settings, onUpdate) {
       if (!subscription) {
         subscription = await registration.pushManager.subscribe({
           userVisibleOnly: true,
-          applicationServerKey: VAPID_PUBLIC_KEY,
+          applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
         })
       }
 
