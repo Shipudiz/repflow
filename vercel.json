@@ -1,8 +1,7 @@
 {
-  "crons": [
-    {
-      "path": "/api/cron-notify",
-      "schedule": "* * * * *"
+  "functions": {
+    "api/*.js": {
+      "maxDuration": 10
     }
-  ]
+  }
 }

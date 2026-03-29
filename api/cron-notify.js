@@ -1,9 +1,15 @@
 import { Redis } from '@upstash/redis'
+import { Receiver } from '@upstash/qstash'
 import webpush from 'web-push'
 
 const redis = new Redis({
   url: process.env.UPSTASH_REDIS_REST_URL,
   token: process.env.UPSTASH_REDIS_REST_TOKEN,
+})
+
+const receiver = new Receiver({
+  currentSigningKey: process.env.QSTASH_CURRENT_SIGNING_KEY,
+  nextSigningKey: process.env.QSTASH_NEXT_SIGNING_KEY,
 })
 
 webpush.setVapidDetails(
@@ -13,57 +19,60 @@ webpush.setVapidDetails(
 )
 
 export default async function handler(req, res) {
-  // Verify cron secret (Vercel sends this header for cron jobs)
-  if (req.headers.authorization !== `Bearer ${process.env.CRON_SECRET}`) {
-    return res.status(401).json({ error: 'Unauthorized' })
+  // Verify request comes from QStash
+  try {
+    const isValid = await receiver.verify({
+      signature: req.headers['upstash-signature'],
+      body: JSON.stringify(req.body),
+    })
+    if (!isValid) return res.status(401).json({ error: 'Invalid signature' })
+  } catch {
+    return res.status(401).json({ error: 'Signature verification failed' })
   }
 
   try {
-    // Get all subscription keys
-    const keys = await redis.keys('sub:*')
-    if (!keys.length) return res.status(200).json({ sent: 0 })
+    const { subKey, reminderId } = req.body
+    if (!subKey) return res.status(400).json({ error: 'Missing subKey' })
 
-    const now = new Date()
-    const currentDay = now.getDay() // 0=Sun
-    const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
+    // Get subscription data
+    const raw = await redis.get(`sub:${subKey}`)
+    const data = typeof raw === 'string' ? JSON.parse(raw) : raw
+    if (!data?.subscription) return res.status(404).json({ error: 'Subscription not found' })
 
-    let sent = 0
-
-    for (const key of keys) {
-      const raw = await redis.get(key)
-      const data = typeof raw === 'string' ? JSON.parse(raw) : raw
-      if (!data?.subscription || !data?.reminders) continue
-
-      for (const reminder of data.reminders) {
-        if (!reminder.enabled) continue
-        if (reminder.time !== currentTime) continue
-        if (!reminder.days.includes(currentDay)) continue
-
-        try {
-          await webpush.sendNotification(
-            data.subscription,
-            JSON.stringify({
-              title: `${reminder.label}`,
-              body: reminder.body || "Time for your workout!",
-              icon: '/icon-192.png',
-              badge: '/icon-192.png',
-              tag: reminder.id,
-            })
-          )
-          sent++
-        } catch (pushErr) {
-          console.error('Push failed for', key, pushErr.statusCode)
-          // Remove expired subscriptions (410 Gone)
-          if (pushErr.statusCode === 410) {
-            await redis.del(key)
-          }
-        }
-      }
+    // Find the specific reminder
+    const reminder = data.reminders?.find(r => r.id === reminderId)
+    if (!reminder || !reminder.enabled) {
+      return res.status(200).json({ skipped: true, reason: 'Reminder disabled or not found' })
     }
 
-    return res.status(200).json({ sent, checked: keys.length, time: currentTime, day: currentDay })
+    // Check if today is a scheduled day
+    const today = new Date().getDay()
+    if (!reminder.days.includes(today)) {
+      return res.status(200).json({ skipped: true, reason: 'Not scheduled today' })
+    }
+
+    // Send push notification
+    await webpush.sendNotification(
+      data.subscription,
+      JSON.stringify({
+        title: reminder.label,
+        body: reminder.body || 'Time for your workout!',
+        icon: '/icon-192.png',
+        badge: '/icon-192.png',
+        tag: reminder.id,
+      })
+    )
+
+    return res.status(200).json({ sent: true, reminder: reminder.label })
   } catch (err) {
-    console.error('Cron error:', err)
-    return res.status(500).json({ error: 'Server error' })
+    // Remove expired subscription (410 Gone)
+    if (err.statusCode === 410) {
+      const { subKey } = req.body
+      if (subKey) await redis.del(`sub:${subKey}`)
+      return res.status(200).json({ removed: true, reason: 'Subscription expired' })
+    }
+
+    console.error('Push error:', err)
+    return res.status(500).json({ error: 'Push failed' })
   }
 }
