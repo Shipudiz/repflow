@@ -13,19 +13,7 @@
     <meta name="apple-mobile-web-app-title" content="Shipud Flow" />
     <meta name="description" content="Daily workout trainer — Kegel, Abs, and more" />
     <title>Shipud Flow</title>
-    <script>
-      // Force-clear stale service workers on first load
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.getRegistrations().then(function(regs) {
-          regs.forEach(function(r) { r.unregister() })
-        })
-        if ('caches' in window) {
-          caches.keys().then(function(names) {
-            names.forEach(function(name) { caches.delete(name) })
-          })
-        }
-      }
-    </script>
+    <!-- Service worker updates handled by skipWaiting + clientsClaim in sw.js -->
   </head>
   <body>
     <div id="root"></div>

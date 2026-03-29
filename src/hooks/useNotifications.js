@@ -3,14 +3,6 @@ import { useEffect, useCallback, useRef } from 'react'
 const VAPID_PUBLIC_KEY = 'BJdPGgfc83VfDNmCIOketX-HvT3AUosLizS51-DwEDrhRrGlOVRRpVpjuF8-R8U66hn3ekPJY8S5Y4WYZnsqPa0'
 const API_BASE = '/api'
 
-// Convert VAPID key from base64url to Uint8Array
-function urlBase64ToUint8Array(base64String) {
-  const padding = '='.repeat((4 - base64String.length % 4) % 4)
-  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/')
-  const raw = atob(base64)
-  return Uint8Array.from([...raw].map(c => c.charCodeAt(0)))
-}
-
 // Serialize PushSubscription safely (iOS Safari compat)
 function serializeSub(sub) {
   if (!sub) return null
@@ -65,7 +57,7 @@ export function useNotifications(settings, onUpdate) {
       if (!subscription) {
         subscription = await registration.pushManager.subscribe({
           userVisibleOnly: true,
-          applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
+          applicationServerKey: VAPID_PUBLIC_KEY,
         })
       }
 
