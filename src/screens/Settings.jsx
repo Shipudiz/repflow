@@ -290,8 +290,13 @@ export default function Settings({ settings, onUpdate, subscribe, unsubscribe, g
     if (result.ok) {
       setPushState('subscribed')
       onUpdate({ notificationsEnabled: true })
-    } else if (result.reason?.includes('denied')) {
-      setPushState('denied')
+    } else {
+      // Show the actual error so we can debug
+      if (result.reason?.includes('denied')) {
+        setPushState('denied')
+      }
+      setTestResult(result.reason || 'Subscribe failed')
+      setTimeout(() => setTestResult(''), 6000)
     }
     setSubscribing(false)
   }
@@ -492,6 +497,11 @@ export default function Settings({ settings, onUpdate, subscribe, unsubscribe, g
               >
                 {subscribing ? 'Enabling...' : 'Enable Push Notifications'}
               </button>
+            )}
+            {testResult && (
+              <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, color: '#ff453a', marginTop: 12, textAlign: 'center', wordBreak: 'break-all' }}>
+                {testResult}
+              </p>
             )}
           </div>
         ) : (

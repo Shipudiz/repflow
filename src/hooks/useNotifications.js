@@ -3,12 +3,41 @@ import { useEffect, useCallback, useRef } from 'react'
 const VAPID_PUBLIC_KEY = 'BJdPGgfc83VfDNmCIOketX-HvT3AUosLizS51-DwEDrhRrGlOVRRpVpjuF8-R8U66hn3ekPJY8S5Y4WYZnsqPa0'
 const API_BASE = '/api'
 
-// Convert VAPID key from base64 to Uint8Array
+// Convert VAPID key from base64url to Uint8Array
 function urlBase64ToUint8Array(base64String) {
   const padding = '='.repeat((4 - base64String.length % 4) % 4)
   const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/')
   const raw = atob(base64)
   return Uint8Array.from([...raw].map(c => c.charCodeAt(0)))
+}
+
+// Serialize PushSubscription safely (iOS Safari compat)
+function serializeSub(sub) {
+  if (!sub) return null
+  // Try toJSON first (Chrome/Firefox)
+  try {
+    const json = sub.toJSON()
+    if (json && json.endpoint && json.keys) return json
+  } catch {}
+  // Manual extraction for iOS Safari
+  try {
+    const toB64url = (buffer) => {
+      const bytes = new Uint8Array(buffer)
+      let str = ''
+      for (const b of bytes) str += String.fromCharCode(b)
+      return btoa(str).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+    }
+    return {
+      endpoint: sub.endpoint,
+      keys: {
+        p256dh: toB64url(sub.getKey('p256dh')),
+        auth: toB64url(sub.getKey('auth')),
+      },
+    }
+  } catch {
+    // Last resort: just endpoint, no keys
+    return { endpoint: sub.endpoint, keys: {} }
+  }
 }
 
 export function useNotifications(settings, onUpdate) {
@@ -21,17 +50,18 @@ export function useNotifications(settings, onUpdate) {
     }
 
     try {
-      // Request notification permission (iOS requires user gesture)
       const permission = await Notification.requestPermission()
       if (permission !== 'granted') {
         return { ok: false, reason: 'Permission denied' }
       }
 
-      // Get service worker registration
       const registration = await navigator.serviceWorker.ready
 
-      // Subscribe to push
-      let subscription = await registration.pushManager.getSubscription()
+      let subscription = null
+      try {
+        subscription = await registration.pushManager.getSubscription()
+      } catch {}
+
       if (!subscription) {
         subscription = await registration.pushManager.subscribe({
           userVisibleOnly: true,
@@ -39,10 +69,15 @@ export function useNotifications(settings, onUpdate) {
         })
       }
 
-      // Send subscription + reminders to backend
-      await syncReminders(subscription, settings.reminders || [])
+      // Sync to backend
+      const serialized = serializeSub(subscription)
+      await fetch(`${API_BASE}/subscribe`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ subscription: serialized, reminders: settings.reminders || [] }),
+      })
 
-      return { ok: true, subscription }
+      return { ok: true }
     } catch (err) {
       console.error('Push subscribe failed:', err)
       return { ok: false, reason: err.message }
@@ -62,11 +97,10 @@ export function useNotifications(settings, onUpdate) {
         })
         await subscription.unsubscribe()
       }
-      return { ok: true }
     } catch (err) {
       console.error('Unsubscribe failed:', err)
-      return { ok: false, reason: err.message }
     }
+    return { ok: true }
   }, [])
 
   // Check if currently subscribed
@@ -80,52 +114,28 @@ export function useNotifications(settings, onUpdate) {
     }
   }, [])
 
-  // Serialize PushSubscription safely (iOS Safari compat)
-  const serializeSub = (sub) => {
-    if (!sub) return null
-    // Try toJSON first (works on Chrome/Firefox), fall back to manual extraction
-    try {
-      const json = sub.toJSON()
-      if (json && json.endpoint && json.keys) return json
-    } catch {}
-    // Manual extraction for iOS Safari
-    const arrayToBase64url = (buffer) => {
-      const bytes = new Uint8Array(buffer)
-      let str = ''
-      for (const b of bytes) str += String.fromCharCode(b)
-      return btoa(str).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
-    }
-    const keys = sub.getKey
-      ? { p256dh: arrayToBase64url(sub.getKey('p256dh')), auth: arrayToBase64url(sub.getKey('auth')) }
-      : {}
-    return { endpoint: sub.endpoint, keys }
-  }
-
-  // Sync reminders to backend whenever they change
-  const syncReminders = async (subscription, reminders) => {
-    await fetch(`${API_BASE}/subscribe`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ subscription: serializeSub(subscription), reminders }),
-    })
-  }
-
-  // Auto-sync when reminders change (if subscribed)
+  // Auto-sync reminders to backend (silent, never throws)
   useEffect(() => {
     if (!settings.notificationsEnabled) return
-
-    // Debounce sync
     if (syncRef.current) clearTimeout(syncRef.current)
-    syncRef.current = setTimeout(async () => {
-      const sub = await getSubscription()
-      if (sub && settings.reminders?.length) {
-        await syncReminders(sub, settings.reminders)
-      }
-    }, 1000)
 
-    return () => {
-      if (syncRef.current) clearTimeout(syncRef.current)
-    }
+    syncRef.current = setTimeout(async () => {
+      try {
+        const sub = await getSubscription()
+        if (sub && settings.reminders?.length) {
+          const serialized = serializeSub(sub)
+          await fetch(`${API_BASE}/subscribe`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ subscription: serialized, reminders: settings.reminders }),
+          })
+        }
+      } catch {
+        // Silent — don't disrupt the UI
+      }
+    }, 2000)
+
+    return () => { if (syncRef.current) clearTimeout(syncRef.current) }
   }, [settings.notificationsEnabled, settings.reminders, getSubscription])
 
   return { subscribe, unsubscribe, getSubscription }
