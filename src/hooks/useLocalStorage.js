@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 
-const CURRENT_VERSION = 1
+const CURRENT_VERSION = 2
 
 export function useLocalStorage(key, initialValue) {
   const [value, setValue] = useState(() => {
@@ -12,10 +12,17 @@ export function useLocalStorage(key, initialValue) {
 
       // Handle versioned envelope
       if (parsed && typeof parsed === 'object' && '_v' in parsed) {
+        // If version is outdated and data looks empty, use fresh defaults
+        if (parsed._v < CURRENT_VERSION && (!parsed.data?.completedWorkouts || parsed.data.completedWorkouts.length === 0)) {
+          return initialValue
+        }
         return { ...initialValue, ...parsed.data }
       }
 
-      // Legacy unversioned data — migrate seamlessly
+      // Legacy unversioned data — if empty, use fresh defaults
+      if (!parsed.completedWorkouts || parsed.completedWorkouts.length === 0) {
+        return initialValue
+      }
       return { ...initialValue, ...parsed }
     } catch {
       return initialValue
