@@ -54,6 +54,78 @@ function BellIcon() {
   )
 }
 
+// ─── Swipe to Delete ────────────────────────────────────────────────────────
+function SwipeToDelete({ children, onDelete, showDivider }) {
+  const DELETE_WIDTH = 72
+
+  return (
+    <div>
+      {showDivider && (
+        <div style={{ height: 1, background: '#404040', opacity: 0.3, margin: '16px 0' }} />
+      )}
+      <div style={{ position: 'relative', overflow: 'hidden' }}>
+        {/* Delete button behind */}
+        <div style={{
+          position: 'absolute',
+          right: 0,
+          top: 0,
+          bottom: 0,
+          width: DELETE_WIDTH,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}>
+          <motion.button
+            whileTap={{ scale: 0.9 }}
+            onClick={onDelete}
+            style={{
+              width: '100%',
+              height: '100%',
+              background: '#cc0d11',
+              border: 'none',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexDirection: 'column',
+              gap: 4,
+            }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="3 6 5 6 21 6" />
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+            </svg>
+            <span style={{ fontFamily: "'Inter', sans-serif", fontWeight: 600, fontSize: 10, color: '#fff', textTransform: 'uppercase' }}>Delete</span>
+          </motion.button>
+        </div>
+
+        {/* Swipeable content */}
+        <motion.div
+          drag="x"
+          dragDirectionLock
+          dragConstraints={{ left: -DELETE_WIDTH, right: 0 }}
+          dragElastic={0.1}
+          onDragEnd={(e, info) => {
+            // If swiped far enough left, snap to reveal delete
+            // Otherwise snap back
+            if (info.offset.x < -DELETE_WIDTH * 0.5) {
+              // Stay open — the dragConstraints handle this
+            }
+          }}
+          style={{
+            background: '#201f1f',
+            position: 'relative',
+            zIndex: 1,
+            touchAction: 'pan-y',
+          }}
+        >
+          {children}
+        </motion.div>
+      </div>
+    </div>
+  )
+}
+
 // ─── Weekly Momentum Bar Chart ──────────────────────────────────────────────
 function WeeklyMomentumChart({ completedWorkouts = [] }) {
   const dayLabels = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN']
@@ -401,11 +473,8 @@ export default function Settings({ settings, onUpdate, subscribe, unsubscribe, g
         ) : (
           <div>
             {reminders.map((row, idx) => (
-              <div key={row.id}>
-                {idx > 0 && (
-                  <div style={{ height: 1, background: '#404040', opacity: 0.3, margin: '16px 0' }} />
-                )}
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+              <SwipeToDelete key={row.id} onDelete={() => removeReminder(row.id)} showDivider={idx > 0}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
                   {/* Toggle */}
                   <div style={{ paddingTop: 6 }}>
                     <Toggle
@@ -414,40 +483,63 @@ export default function Settings({ settings, onUpdate, subscribe, unsubscribe, g
                     />
                   </div>
 
-                  {/* Workout selector + day pills + time */}
-                  <div style={{ flex: 1 }}>
-                    {/* Workout selector dropdown */}
-                    <select
-                      value={row.label}
-                      onChange={e => updateReminder(row.id, { label: e.target.value })}
-                      style={{
-                        background: '#131313',
-                        border: 'none',
-                        borderRadius: 6,
-                        padding: '8px 12px',
-                        fontFamily: "'Inter', sans-serif",
-                        fontWeight: 500,
-                        fontSize: 14,
-                        color: '#e5e2e1',
-                        width: '100%',
-                        marginBottom: 8,
-                        cursor: 'pointer',
-                        appearance: 'none',
-                        WebkitAppearance: 'none',
-                        backgroundImage: `url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%238d90a2' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E")`,
-                        backgroundRepeat: 'no-repeat',
-                        backgroundPosition: 'right 12px center',
-                        paddingRight: 32,
-                      }}
-                    >
-                      <option value={row.label}>{row.label}</option>
-                      {availableOptions.filter(o => o !== row.label).map(opt => (
-                        <option key={opt} value={opt}>{opt}</option>
-                      ))}
-                    </select>
+                  {/* Content: selector + days on top row, time below */}
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    {/* Top: workout selector + time */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                      <select
+                        value={row.label}
+                        onChange={e => updateReminder(row.id, { label: e.target.value })}
+                        style={{
+                          background: '#131313',
+                          border: 'none',
+                          borderRadius: 6,
+                          padding: '8px 12px',
+                          fontFamily: "'Inter', sans-serif",
+                          fontWeight: 500,
+                          fontSize: 14,
+                          color: '#e5e2e1',
+                          flex: 1,
+                          minWidth: 0,
+                          cursor: 'pointer',
+                          appearance: 'none',
+                          WebkitAppearance: 'none',
+                          backgroundImage: `url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%238d90a2' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E")`,
+                          backgroundRepeat: 'no-repeat',
+                          backgroundPosition: 'right 12px center',
+                          paddingRight: 32,
+                        }}
+                      >
+                        <option value={row.label}>{row.label}</option>
+                        {availableOptions.filter(o => o !== row.label).map(opt => (
+                          <option key={opt} value={opt}>{opt}</option>
+                        ))}
+                      </select>
+
+                      <input
+                        type="time"
+                        value={row.time}
+                        step="900"
+                        onChange={e => updateReminder(row.id, { time: e.target.value })}
+                        style={{
+                          background: '#131313',
+                          border: 'none',
+                          borderRadius: 6,
+                          padding: '6px 10px',
+                          fontFamily: "'Plus Jakarta Sans', sans-serif",
+                          fontWeight: 600,
+                          fontSize: 16,
+                          color: '#e5e2e1',
+                          flexShrink: 0,
+                          width: 82,
+                          cursor: 'pointer',
+                          colorScheme: 'dark',
+                        }}
+                      />
+                    </div>
 
                     {/* Day pills */}
-                    <div style={{ display: 'flex', gap: 4, marginBottom: 8 }}>
+                    <div style={{ display: 'flex', gap: 4 }}>
                       {DAY_LABELS.map((label, dayIdx) => {
                         const isSelected = row.days.includes(dayIdx)
                         return (
@@ -470,46 +562,8 @@ export default function Settings({ settings, onUpdate, subscribe, unsubscribe, g
                       })}
                     </div>
                   </div>
-
-                  {/* Time picker */}
-                  <input
-                    type="time"
-                    value={row.time}
-                    onChange={e => updateReminder(row.id, { time: e.target.value })}
-                    style={{
-                      background: '#131313',
-                      border: 'none',
-                      borderRadius: 6,
-                      padding: '6px 8px',
-                      fontFamily: "'Plus Jakarta Sans', sans-serif",
-                      fontWeight: 500,
-                      fontSize: 20,
-                      color: '#e5e2e1',
-                      flexShrink: 0,
-                      width: 90,
-                      cursor: 'pointer',
-                      colorScheme: 'dark',
-                    }}
-                  />
-
-                  {/* Delete button */}
-                  <motion.button
-                    whileTap={{ scale: 0.8 }}
-                    onClick={() => removeReminder(row.id)}
-                    style={{
-                      width: 28, height: 28, borderRadius: 14,
-                      background: 'rgba(204,13,17,0.15)',
-                      border: 'none', cursor: 'pointer',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      flexShrink: 0, marginTop: 6,
-                    }}
-                  >
-                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                      <path d="M2 2L10 10M10 2L2 10" stroke="#ffb4aa" strokeWidth="1.5" strokeLinecap="round" />
-                    </svg>
-                  </motion.button>
                 </div>
-              </div>
+              </SwipeToDelete>
             ))}
 
             {/* Add new reminder button */}
