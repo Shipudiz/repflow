@@ -309,8 +309,26 @@ export default function Settings({ settings, onUpdate, subscribe, unsubscribe, g
 
   const handleTestPush = async () => {
     setTestingPush(true)
-    setTestResult('')
+    setTestResult('Resetting...')
     try {
+      // Step 1: Clear all bad data from Redis
+      await fetch('/api/reset-push', { method: 'POST' })
+      setTestResult('Re-subscribing...')
+
+      // Step 2: Unsubscribe locally
+      await unsubscribe()
+
+      // Step 3: Re-subscribe with fixed serialization
+      const result = await subscribe()
+      if (!result.ok) {
+        setTestResult(`Subscribe failed: ${result.reason}`)
+        setTestingPush(false)
+        return
+      }
+
+      setTestResult('Sending test...')
+
+      // Step 4: Send test push
       const resp = await fetch('/api/test-push', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -320,13 +338,13 @@ export default function Settings({ settings, onUpdate, subscribe, unsubscribe, g
       if (data.sent) {
         setTestResult('Sent! Check notifications')
       } else {
-        setTestResult(data.error || 'No subscription found')
+        setTestResult(JSON.stringify(data))
       }
     } catch (err) {
       setTestResult(`Failed: ${err.message}`)
     }
     setTestingPush(false)
-    setTimeout(() => setTestResult(''), 5000)
+    setTimeout(() => setTestResult(''), 8000)
   }
 
   // Dynamic reminders stored in settings
