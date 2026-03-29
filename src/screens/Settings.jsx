@@ -270,6 +270,8 @@ function WeeklyMomentumChart({ completedWorkouts = [] }) {
 export default function Settings({ settings, onUpdate, subscribe, unsubscribe, getSubscription }) {
   const [pushState, setPushState] = useState('loading') // loading | unsupported | unsubscribed | subscribed | denied
   const [subscribing, setSubscribing] = useState(false)
+  const [testingPush, setTestingPush] = useState(false)
+  const [testResult, setTestResult] = useState('')
 
   // Check current push subscription status on mount
   useEffect(() => {
@@ -298,6 +300,34 @@ export default function Settings({ settings, onUpdate, subscribe, unsubscribe, g
     await unsubscribe()
     setPushState('unsubscribed')
     onUpdate({ notificationsEnabled: false })
+  }
+
+  const handleTestPush = async () => {
+    setTestingPush(true)
+    setTestResult('')
+    try {
+      const sub = await getSubscription()
+      if (!sub) {
+        setTestResult('No subscription found')
+        setTestingPush(false)
+        return
+      }
+      const resp = await fetch('/api/test-push', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ subscription: sub.toJSON() }),
+      })
+      const data = await resp.json()
+      if (data.sent) {
+        setTestResult('Sent! Check your notifications')
+      } else {
+        setTestResult(`Error: ${data.error || 'Unknown'}`)
+      }
+    } catch (err) {
+      setTestResult(`Failed: ${err.message}`)
+    }
+    setTestingPush(false)
+    setTimeout(() => setTestResult(''), 4000)
   }
 
   // Dynamic reminders stored in settings
@@ -597,24 +627,34 @@ export default function Settings({ settings, onUpdate, subscribe, unsubscribe, g
               </motion.button>
             )}
 
-            {/* Disable notifications */}
-            <button
-              onClick={handleUnsubscribe}
+            {/* Test notification */}
+            <motion.button
+              whileTap={{ scale: 0.97 }}
+              onClick={handleTestPush}
+              disabled={testingPush}
               style={{
                 width: '100%',
                 marginTop: 12,
-                padding: '10px 0',
-                background: 'none',
+                padding: '12px 0',
+                background: '#353534',
                 border: 'none',
-                fontFamily: "'Inter', sans-serif",
-                fontWeight: 500,
-                fontSize: 12,
-                color: '#8d90a2',
+                borderRadius: 8,
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
                 cursor: 'pointer',
+                opacity: testingPush ? 0.6 : 1,
               }}
             >
-              Disable push notifications
-            </button>
+              <BellIcon />
+              <span style={{
+                fontFamily: "'Inter', sans-serif",
+                fontWeight: 600, fontSize: 13,
+                color: '#e5e2e1',
+                textTransform: 'uppercase',
+                letterSpacing: 0.8,
+              }}>
+                {testResult || (testingPush ? 'Sending...' : 'Test Notification')}
+              </span>
+            </motion.button>
           </div>
         )}
       </motion.div>
