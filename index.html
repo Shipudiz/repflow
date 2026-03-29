@@ -14,17 +14,6 @@
     <meta name="description" content="Daily workout trainer — Kegel, Abs, and more" />
     <title>Shipud Flow</title>
     <script>
-      // Debug: show errors on-screen for mobile debugging
-      window.onerror = function(msg, url, line, col, err) {
-        var d = document.getElementById('_dbg')
-        if (!d) { d = document.createElement('div'); d.id = '_dbg'; d.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:99999;background:red;color:white;font:12px monospace;padding:12px;max-height:50vh;overflow:auto;'; document.body.appendChild(d); }
-        d.innerHTML += '<p>' + msg + ' @ ' + url + ':' + line + ':' + col + '</p>';
-      }
-      window.addEventListener('unhandledrejection', function(e) {
-        var d = document.getElementById('_dbg')
-        if (!d) { d = document.createElement('div'); d.id = '_dbg'; d.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:99999;background:red;color:white;font:12px monospace;padding:12px;max-height:50vh;overflow:auto;'; document.body.appendChild(d); }
-        d.innerHTML += '<p>Promise: ' + (e.reason ? e.reason.message || e.reason : 'unknown') + '</p>';
-      })
       // Force-clear stale service workers on first load
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.getRegistrations().then(function(regs) {

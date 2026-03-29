@@ -11,7 +11,7 @@ export function useNotifications(settings, onUpdate) {
   // Schedule a push notification using setTimeout (works while app is open)
   // For true background notifications a service worker would be needed
   const scheduleNotification = useCallback((title, body, timeStr) => {
-    if (Notification.permission !== 'granted') return
+    if (!('Notification' in window) || Notification.permission !== 'granted') return
     const [h, m] = timeStr.split(':').map(Number)
     const now = new Date()
     const target = new Date()
