@@ -26,7 +26,7 @@ export function useNotifications(settings, onUpdate) {
 
     initPromise = OneSignal.init({
       appId: ONESIGNAL_APP_ID,
-      serviceWorkerPath: '/sw.js',
+      serviceWorkerPath: '/OneSignalSDKWorker.js',
       serviceWorkerParam: { scope: '/' },
       allowLocalhostAsSecureOrigin: true,
     }).then(() => {
