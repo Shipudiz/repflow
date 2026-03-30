@@ -11,87 +11,71 @@ const qstash = new Client({ token: process.env.QSTASH_TOKEN })
 // Build a cron expression: "MM HH * * days"
 function reminderToCron(reminder) {
   const [h, m] = reminder.time.split(':')
-  // Convert day indices to cron (0=Sun in both JS and cron)
   const days = reminder.days.length === 7 ? '*' : reminder.days.join(',')
   return `${parseInt(m)} ${parseInt(h)} * * ${days}`
 }
 
-async function syncSchedules(subKey, reminders, appUrl) {
-  // 1. Delete all existing QStash schedules for this subscription
-  const existingIds = await redis.smembers(`sched:${subKey}`)
+async function syncSchedules(userId, reminders, appUrl) {
+  // 1. Delete all existing QStash schedules for this user
+  const existingIds = await redis.smembers(`sched:${userId}`)
   for (const schedId of existingIds || []) {
     try {
       await qstash.schedules.delete(schedId)
     } catch (e) {
-      // Schedule may already be gone
       console.log('Schedule delete skipped:', schedId, e.message)
     }
   }
-  await redis.del(`sched:${subKey}`)
+  await redis.del(`sched:${userId}`)
 
   // 2. Create new schedules for each enabled reminder
   const newIds = []
   for (const reminder of reminders) {
-    if (!reminder.enabled) continue
-    if (!reminder.days.length) continue
+    if (!reminder.enabled || !reminder.days.length) continue
 
     const cron = reminderToCron(reminder)
     const schedule = await qstash.schedules.create({
       destination: `${appUrl}/api/cron-notify`,
       cron,
-      body: JSON.stringify({ subKey, reminderId: reminder.id }),
+      body: JSON.stringify({ userId, reminderId: reminder.id }),
       headers: { 'Content-Type': 'application/json' },
     })
     newIds.push(schedule.scheduleId)
   }
 
-  // 3. Store schedule IDs so we can clean them up later
   if (newIds.length) {
-    await redis.sadd(`sched:${subKey}`, ...newIds)
+    await redis.sadd(`sched:${userId}`, ...newIds)
   }
 }
 
 export default async function handler(req, res) {
-  // CORS
   res.setHeader('Access-Control-Allow-Origin', '*')
   res.setHeader('Access-Control-Allow-Methods', 'POST, DELETE, OPTIONS')
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
   if (req.method === 'OPTIONS') return res.status(200).end()
 
-  // Derive app URL from request
   const proto = req.headers['x-forwarded-proto'] || 'https'
   const host = req.headers['x-forwarded-host'] || req.headers.host
   const appUrl = `${proto}://${host}`
 
   try {
     if (req.method === 'POST') {
-      const { subscription, reminders } = req.body
-      if (!subscription || !subscription.endpoint) {
-        return res.status(400).json({ error: 'Missing subscription' })
+      const { subscriptionId, userId, reminders } = req.body
+      if (!subscriptionId || !userId) {
+        return res.status(400).json({ error: 'Missing subscriptionId or userId' })
       }
 
-      const subKey = Buffer.from(subscription.endpoint).toString('base64url').slice(0, 32)
-
-      // Store subscription + reminders in Redis
-      await redis.set(`sub:${subKey}`, JSON.stringify({ subscription, reminders: reminders || [] }))
-
-      // Sync QStash schedules
-      await syncSchedules(subKey, reminders || [], appUrl)
+      await redis.set(`sub:${userId}`, JSON.stringify({ subscriptionId, reminders: reminders || [] }))
+      await syncSchedules(userId, reminders || [], appUrl)
 
       return res.status(200).json({ ok: true })
     }
 
     if (req.method === 'DELETE') {
-      const { endpoint } = req.body
-      if (!endpoint) return res.status(400).json({ error: 'Missing endpoint' })
+      const { userId } = req.body
+      if (!userId) return res.status(400).json({ error: 'Missing userId' })
 
-      const subKey = Buffer.from(endpoint).toString('base64url').slice(0, 32)
-
-      // Clean up schedules
-      await syncSchedules(subKey, [], '')
-
-      // Remove subscription
-      await redis.del(`sub:${subKey}`)
+      await syncSchedules(userId, [], '')
+      await redis.del(`sub:${userId}`)
 
       return res.status(200).json({ ok: true })
     }

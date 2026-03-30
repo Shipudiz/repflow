@@ -1,6 +1,5 @@
 import { Redis } from '@upstash/redis'
 import { Receiver } from '@upstash/qstash'
-import webpush from 'web-push'
 
 const redis = new Redis({
   url: process.env.UPSTASH_REDIS_REST_URL,
@@ -12,14 +11,25 @@ const receiver = new Receiver({
   nextSigningKey: process.env.QSTASH_NEXT_SIGNING_KEY,
 })
 
-webpush.setVapidDetails(
-  'mailto:noam.dayan@wsc-sports.com',
-  process.env.VAPID_PUBLIC_KEY,
-  process.env.VAPID_PRIVATE_KEY
-)
+async function sendOneSignalNotification(subscriptionId, title, body) {
+  const resp = await fetch('https://onesignal.com/api/v1/notifications', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Basic ${process.env.ONESIGNAL_REST_API_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      app_id: process.env.ONESIGNAL_APP_ID,
+      include_subscription_ids: [subscriptionId],
+      headings: { en: title },
+      contents: { en: body },
+    }),
+  })
+  return resp.json()
+}
 
 export default async function handler(req, res) {
-  // Verify request comes from QStash
+  // Verify QStash signature
   try {
     const isValid = await receiver.verify({
       signature: req.headers['upstash-signature'],
@@ -31,47 +41,31 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { subKey, reminderId } = req.body
-    if (!subKey) return res.status(400).json({ error: 'Missing subKey' })
+    const { userId, reminderId } = req.body
+    if (!userId) return res.status(400).json({ error: 'Missing userId' })
 
-    // Get subscription data
-    const raw = await redis.get(`sub:${subKey}`)
+    const raw = await redis.get(`sub:${userId}`)
     const data = typeof raw === 'string' ? JSON.parse(raw) : raw
-    if (!data?.subscription) return res.status(404).json({ error: 'Subscription not found' })
+    if (!data?.subscriptionId) return res.status(404).json({ error: 'Subscription not found' })
 
-    // Find the specific reminder
     const reminder = data.reminders?.find(r => r.id === reminderId)
     if (!reminder || !reminder.enabled) {
       return res.status(200).json({ skipped: true, reason: 'Reminder disabled or not found' })
     }
 
-    // Check if today is a scheduled day
     const today = new Date().getDay()
     if (!reminder.days.includes(today)) {
       return res.status(200).json({ skipped: true, reason: 'Not scheduled today' })
     }
 
-    // Send push notification
-    await webpush.sendNotification(
-      data.subscription,
-      JSON.stringify({
-        title: reminder.label,
-        body: reminder.body || 'Time for your workout!',
-        icon: '/icon-192.png',
-        badge: '/icon-192.png',
-        tag: reminder.id,
-      })
+    const result = await sendOneSignalNotification(
+      data.subscriptionId,
+      reminder.label,
+      reminder.body || 'Time for your workout!'
     )
 
-    return res.status(200).json({ sent: true, reminder: reminder.label })
+    return res.status(200).json({ sent: true, reminder: reminder.label, onesignal: result })
   } catch (err) {
-    // Remove expired subscription (410 Gone)
-    if (err.statusCode === 410) {
-      const { subKey } = req.body
-      if (subKey) await redis.del(`sub:${subKey}`)
-      return res.status(200).json({ removed: true, reason: 'Subscription expired' })
-    }
-
     console.error('Push error:', err)
     return res.status(500).json({ error: 'Push failed' })
   }

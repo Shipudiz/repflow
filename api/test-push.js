@@ -1,16 +1,9 @@
 import { Redis } from '@upstash/redis'
-import webpush from 'web-push'
 
 const redis = new Redis({
   url: process.env.UPSTASH_REDIS_REST_URL,
   token: process.env.UPSTASH_REDIS_REST_TOKEN,
 })
-
-webpush.setVapidDetails(
-  'mailto:noam.dayan@wsc-sports.com',
-  process.env.VAPID_PUBLIC_KEY,
-  process.env.VAPID_PRIVATE_KEY
-)
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*')
@@ -19,35 +12,35 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end()
 
   try {
-    // Find all stored subscriptions in Redis and send test to all
     const keys = await redis.keys('sub:*')
     if (!keys.length) {
-      return res.status(404).json({ error: 'No subscriptions stored in Redis. Try toggling notifications off and on.' })
+      return res.status(404).json({ error: 'No subscriptions in Redis. Enable notifications first.' })
     }
 
     const results = []
     for (const key of keys) {
       const raw = await redis.get(key)
       const data = typeof raw === 'string' ? JSON.parse(raw) : raw
-      if (!data?.subscription) continue
+      if (!data?.subscriptionId) continue
 
       try {
-        await webpush.sendNotification(
-          data.subscription,
-          JSON.stringify({
-            title: 'Shipud Flow',
-            body: 'Push notifications are working!',
-            icon: '/icon-192.png',
-            badge: '/icon-192.png',
-            tag: 'test',
-          })
-        )
-        results.push({ key, sent: true })
-      } catch (pushErr) {
-        results.push({ key, error: pushErr.message, statusCode: pushErr.statusCode })
-        if (pushErr.statusCode === 410) {
-          await redis.del(key)
-        }
+        const resp = await fetch('https://onesignal.com/api/v1/notifications', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Basic ${process.env.ONESIGNAL_REST_API_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            app_id: process.env.ONESIGNAL_APP_ID,
+            include_subscription_ids: [data.subscriptionId],
+            headings: { en: 'Shipud Flow' },
+            contents: { en: 'Push notifications are working!' },
+          }),
+        })
+        const result = await resp.json()
+        results.push({ key, sent: true, onesignal: result })
+      } catch (err) {
+        results.push({ key, error: err.message })
       }
     }
 
