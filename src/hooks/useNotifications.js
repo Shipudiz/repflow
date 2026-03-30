@@ -47,6 +47,7 @@ export function useNotifications(settings, onUpdate) {
         body: JSON.stringify({
           userId,
           reminders: settings.reminders || [],
+          tzOffset: new Date().getTimezoneOffset(),
         }),
       })
 
@@ -103,6 +104,7 @@ export function useNotifications(settings, onUpdate) {
             body: JSON.stringify({
               userId,
               reminders: settings.reminders,
+              tzOffset: new Date().getTimezoneOffset(),
             }),
           })
         }

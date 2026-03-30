@@ -16,7 +16,7 @@ export default async function handler(req, res) {
     const appUrl = `${proto}://${host}`
 
     if (req.method === 'POST') {
-      const { userId, reminders } = req.body
+      const { userId, reminders, tzOffset } = req.body
       if (!userId) {
         return res.status(400).json({ error: 'Missing userId' })
       }
@@ -41,9 +41,16 @@ export default async function handler(req, res) {
         const newIds = []
         for (const reminder of (reminders || [])) {
           if (!reminder.enabled || !reminder.days?.length) continue
-          const [h, m] = reminder.time.split(':')
+          // Convert local time to UTC using client's timezone offset
+          // tzOffset is in minutes, e.g. -180 for UTC+3 (Israel)
+          const [localH, localM] = reminder.time.split(':').map(Number)
+          const totalMinutesLocal = localH * 60 + localM
+          const offset = typeof tzOffset === 'number' ? tzOffset : -180 // default Israel
+          const totalMinutesUTC = ((totalMinutesLocal + offset) % 1440 + 1440) % 1440
+          const utcH = Math.floor(totalMinutesUTC / 60)
+          const utcM = totalMinutesUTC % 60
           const days = reminder.days.length === 7 ? '*' : reminder.days.join(',')
-          const cron = `${parseInt(m)} ${parseInt(h)} * * ${days}`
+          const cron = `${utcM} ${utcH} * * ${days}`
 
           const schedule = await qstash.schedules.create({
             destination: `${appUrl}/api/cron-notify`,
