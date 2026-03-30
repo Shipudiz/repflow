@@ -1,35 +1,38 @@
-import { Redis } from '@upstash/redis'
-
-const redis = new Redis({
-  url: process.env.UPSTASH_REDIS_REST_URL,
-  token: process.env.UPSTASH_REDIS_REST_TOKEN,
-})
-
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*')
 
-  try {
-    const subKeys = await redis.keys('sub:*')
-    const schedKeys = await redis.keys('sched:*')
+  const envCheck = {
+    ONESIGNAL_APP_ID: process.env.ONESIGNAL_APP_ID ? 'set' : 'MISSING',
+    ONESIGNAL_REST_API_KEY: process.env.ONESIGNAL_REST_API_KEY ? `set (${process.env.ONESIGNAL_REST_API_KEY.slice(0, 8)}...)` : 'MISSING',
+    UPSTASH_REDIS_REST_URL: process.env.UPSTASH_REDIS_REST_URL ? 'set' : 'MISSING',
+    UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN ? 'set' : 'MISSING',
+    QSTASH_TOKEN: process.env.QSTASH_TOKEN ? 'set' : 'MISSING',
+    VITE_ONESIGNAL_APP_ID: process.env.VITE_ONESIGNAL_APP_ID ? 'set' : 'MISSING',
+  }
 
+  let redisData = null
+  try {
+    const { Redis } = await import('@upstash/redis')
+    const redis = new Redis({
+      url: process.env.UPSTASH_REDIS_REST_URL,
+      token: process.env.UPSTASH_REDIS_REST_TOKEN,
+    })
+    const subKeys = await redis.keys('sub:*')
     const subs = []
     for (const key of subKeys) {
       const raw = await redis.get(key)
       const data = typeof raw === 'string' ? JSON.parse(raw) : raw
-      subs.push({ key, subscriptionId: data?.subscriptionId, reminderCount: data?.reminders?.length })
+      subs.push({
+        key,
+        subscriptionId: data?.subscriptionId || 'NONE',
+        reminderCount: data?.reminders?.length || 0,
+      })
     }
-
-    return res.status(200).json({
-      subscriptions: subs,
-      scheduleKeys: schedKeys,
-      envCheck: {
-        hasAppId: !!process.env.ONESIGNAL_APP_ID,
-        hasRestKey: !!process.env.ONESIGNAL_REST_API_KEY,
-        hasRedis: !!process.env.UPSTASH_REDIS_REST_URL,
-        hasQstash: !!process.env.QSTASH_TOKEN,
-      },
-    })
+    const schedKeys = await redis.keys('sched:*')
+    redisData = { subscriptions: subs, scheduleKeys: schedKeys }
   } catch (err) {
-    return res.status(500).json({ error: err.message })
+    redisData = { error: err.message }
   }
+
+  return res.status(200).json({ envCheck, redis: redisData })
 }
