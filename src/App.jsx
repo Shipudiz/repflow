@@ -27,13 +27,21 @@ export default function App() {
       ? (settings.streakDays || 0) + 1
       : last === today ? settings.streakDays || 0 : 1
 
+    const newCompleted = [
+      ...(settings.completedWorkouts || []),
+      { date: new Date().toISOString(), workoutId, durationSec }
+    ]
+
+    // Auto-advance kegel week based on total kegel sessions completed
+    const kegelSessions = newCompleted.filter(w => w.workoutId?.startsWith('kegel-')).length
+    // ~14 sessions per 2-week level: 1-2 → 3-4 → 5-6 → 7+
+    const newKegelWeek = kegelSessions < 28 ? Math.floor(kegelSessions / 14) * 2 + 1 : 7
+
     updateSettings({
       lastWorkoutDate: today,
       streakDays: newStreak,
-      completedWorkouts: [
-        ...(settings.completedWorkouts || []),
-        { date: new Date().toISOString(), workoutId, durationSec }
-      ]
+      kegelWeek: Math.max(settings.kegelWeek || 1, newKegelWeek),
+      completedWorkouts: newCompleted,
     })
   }
 

@@ -205,8 +205,8 @@ export const DEFAULT_SETTINGS = {
   morningTime: '10:00',
   eveningTime: '18:00',
   notificationsEnabled: true,
-  streakDays: 8,
-  lastWorkoutDate: 'Sun Mar 29 2026',
+  streakDays: 0,
+  lastWorkoutDate: null,
   completedWorkouts: [
     { date: '2026-03-22T20:09:35.192Z', workoutId: 'kegel-morning', durationSec: 0 },
     { date: '2026-03-23T08:01:53.935Z', workoutId: 'kegel-morning', durationSec: 0 },
