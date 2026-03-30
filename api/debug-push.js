@@ -8,6 +8,19 @@ export default async function handler(req, res) {
     UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN ? 'set' : 'MISSING',
     QSTASH_TOKEN: process.env.QSTASH_TOKEN ? 'set' : 'MISSING',
     VITE_ONESIGNAL_APP_ID: process.env.VITE_ONESIGNAL_APP_ID ? 'set' : 'MISSING',
+    QSTASH_CURRENT_SIGNING_KEY: process.env.QSTASH_CURRENT_SIGNING_KEY ? 'set' : 'MISSING',
+    QSTASH_NEXT_SIGNING_KEY: process.env.QSTASH_NEXT_SIGNING_KEY ? 'set' : 'MISSING',
+  }
+
+  // Test QStash connection
+  let qstashTest = null
+  try {
+    const { Client } = await import('@upstash/qstash')
+    const qstash = new Client({ token: process.env.QSTASH_TOKEN })
+    const schedules = await qstash.schedules.list()
+    qstashTest = { ok: true, scheduleCount: schedules.length }
+  } catch (err) {
+    qstashTest = { error: err.message }
   }
 
   let redisData = null
@@ -34,5 +47,5 @@ export default async function handler(req, res) {
     redisData = { error: err.message }
   }
 
-  return res.status(200).json({ envCheck, redis: redisData })
+  return res.status(200).json({ envCheck, redis: redisData, qstash: qstashTest })
 }
