@@ -8,7 +8,6 @@ const redis = new Redis({
 
 const qstash = new Client({ token: process.env.QSTASH_TOKEN })
 
-// Build a cron expression: "MM HH * * days"
 function reminderToCron(reminder) {
   const [h, m] = reminder.time.split(':')
   const days = reminder.days.length === 7 ? '*' : reminder.days.join(',')
@@ -16,7 +15,6 @@ function reminderToCron(reminder) {
 }
 
 async function syncSchedules(userId, reminders, appUrl) {
-  // 1. Delete all existing QStash schedules for this user
   const existingIds = await redis.smembers(`sched:${userId}`)
   for (const schedId of existingIds || []) {
     try {
@@ -27,7 +25,6 @@ async function syncSchedules(userId, reminders, appUrl) {
   }
   await redis.del(`sched:${userId}`)
 
-  // 2. Create new schedules for each enabled reminder
   const newIds = []
   for (const reminder of reminders) {
     if (!reminder.enabled || !reminder.days.length) continue
@@ -59,12 +56,13 @@ export default async function handler(req, res) {
 
   try {
     if (req.method === 'POST') {
-      const { subscriptionId, userId, reminders } = req.body
-      if (!subscriptionId || !userId) {
-        return res.status(400).json({ error: 'Missing subscriptionId or userId' })
+      const { userId, reminders } = req.body
+      if (!userId) {
+        return res.status(400).json({ error: 'Missing userId' })
       }
 
-      await redis.set(`sub:${userId}`, JSON.stringify({ subscriptionId, reminders: reminders || [] }))
+      // Store userId + reminders (OneSignal handles push delivery via external_user_id)
+      await redis.set(`sub:${userId}`, JSON.stringify({ userId, reminders: reminders || [] }))
       await syncSchedules(userId, reminders || [], appUrl)
 
       return res.status(200).json({ ok: true })

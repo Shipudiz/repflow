@@ -13,27 +13,8 @@ function getUserId() {
   return id
 }
 
-// Wait for OneSignal to assign a subscription ID (polls up to 10s)
-function waitForSubscriptionId(maxWaitMs = 10000) {
-  return new Promise((resolve) => {
-    const id = OneSignal.User.PushSubscription.id
-    if (id) return resolve(id)
-
-    const start = Date.now()
-    const interval = setInterval(() => {
-      const subId = OneSignal.User.PushSubscription.id
-      if (subId) {
-        clearInterval(interval)
-        resolve(subId)
-      } else if (Date.now() - start > maxWaitMs) {
-        clearInterval(interval)
-        resolve(null)
-      }
-    }, 300)
-  })
-}
-
 let onesignalReady = false
+let initPromise = null
 
 export function useNotifications(settings, onUpdate) {
   const syncRef = useRef(null)
@@ -43,15 +24,13 @@ export function useNotifications(settings, onUpdate) {
     if (onesignalReady || !ONESIGNAL_APP_ID) return
     onesignalReady = true
 
-    OneSignal.init({
+    initPromise = OneSignal.init({
       appId: ONESIGNAL_APP_ID,
       serviceWorkerPath: '/sw.js',
       serviceWorkerParam: { scope: '/' },
       allowLocalhostAsSecureOrigin: true,
     }).then(() => {
-      // Login with persistent user ID immediately
-      const userId = getUserId()
-      return OneSignal.login(userId)
+      return OneSignal.login(getUserId())
     }).catch(err => console.warn('OneSignal init:', err))
   }, [])
 
@@ -59,23 +38,29 @@ export function useNotifications(settings, onUpdate) {
     try {
       if (!ONESIGNAL_APP_ID) return { ok: false, reason: 'OneSignal not configured' }
 
+      // Wait for init to complete
+      if (initPromise) await initPromise
+
       await OneSignal.Notifications.requestPermission()
       await OneSignal.User.PushSubscription.optIn()
 
-      const subId = await waitForSubscriptionId()
-      if (!subId) return { ok: false, reason: 'No subscription ID — try again' }
-
       const userId = getUserId()
+      await OneSignal.login(userId)
 
-      await fetch(`${API_BASE}/subscribe`, {
+      // Save userId + reminders to backend (no need for subscription ID)
+      const resp = await fetch(`${API_BASE}/subscribe`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          subscriptionId: subId,
           userId,
           reminders: settings.reminders || [],
         }),
       })
+
+      if (!resp.ok) {
+        const err = await resp.json().catch(() => ({}))
+        return { ok: false, reason: err.error || `Server ${resp.status}` }
+      }
 
       return { ok: true }
     } catch (err) {
@@ -119,18 +104,14 @@ export function useNotifications(settings, onUpdate) {
         const sub = await getSubscription()
         if (sub && settings.reminders?.length) {
           const userId = getUserId()
-          const subId = OneSignal.User.PushSubscription.id
-          if (subId) {
-            await fetch(`${API_BASE}/subscribe`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                subscriptionId: subId,
-                userId,
-                reminders: settings.reminders,
-              }),
-            })
-          }
+          await fetch(`${API_BASE}/subscribe`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              userId,
+              reminders: settings.reminders,
+            }),
+          })
         }
       } catch {
         // Silent

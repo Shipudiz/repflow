@@ -11,7 +11,7 @@ const receiver = new Receiver({
   nextSigningKey: process.env.QSTASH_NEXT_SIGNING_KEY,
 })
 
-async function sendOneSignalNotification(subscriptionId, title, body) {
+async function sendOneSignalNotification(userId, title, body) {
   const resp = await fetch('https://api.onesignal.com/notifications', {
     method: 'POST',
     headers: {
@@ -20,7 +20,8 @@ async function sendOneSignalNotification(subscriptionId, title, body) {
     },
     body: JSON.stringify({
       app_id: process.env.ONESIGNAL_APP_ID,
-      include_player_ids: [subscriptionId],
+      include_aliases: { external_id: [userId] },
+      target_channel: 'push',
       headings: { en: title },
       contents: { en: body },
     }),
@@ -45,7 +46,7 @@ export default async function handler(req, res) {
 
     const raw = await redis.get(`sub:${userId}`)
     const data = typeof raw === 'string' ? JSON.parse(raw) : raw
-    if (!data?.subscriptionId) return res.status(404).json({ error: 'Subscription not found' })
+    if (!data) return res.status(404).json({ error: 'User not found' })
 
     const reminder = data.reminders?.find(r => r.id === reminderId)
     if (!reminder || !reminder.enabled) {
@@ -58,7 +59,7 @@ export default async function handler(req, res) {
     }
 
     const result = await sendOneSignalNotification(
-      data.subscriptionId,
+      userId,
       reminder.label,
       reminder.body || 'Time for your workout!'
     )
