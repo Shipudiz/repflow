@@ -25,9 +25,11 @@ async function syncSchedules(userId, reminders, appUrl) {
   }
   await redis.del(`sched:${userId}`)
 
+  if (!appUrl) return // DELETE path — just clean up
+
   const newIds = []
   for (const reminder of reminders) {
-    if (!reminder.enabled || !reminder.days.length) continue
+    if (!reminder.enabled || !reminder.days?.length) continue
 
     const cron = reminderToCron(reminder)
     const schedule = await qstash.schedules.create({
@@ -61,18 +63,26 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'Missing userId' })
       }
 
-      // Store userId + reminders (OneSignal handles push delivery via external_user_id)
+      // Always save to Redis first
       await redis.set(`sub:${userId}`, JSON.stringify({ userId, reminders: reminders || [] }))
-      await syncSchedules(userId, reminders || [], appUrl)
 
-      return res.status(200).json({ ok: true })
+      // Schedule sync is best-effort — don't fail the subscribe if QStash errors
+      let scheduleError = null
+      try {
+        await syncSchedules(userId, reminders || [], appUrl)
+      } catch (e) {
+        scheduleError = e.message
+        console.error('Schedule sync failed:', e)
+      }
+
+      return res.status(200).json({ ok: true, scheduleError })
     }
 
     if (req.method === 'DELETE') {
       const { userId } = req.body
       if (!userId) return res.status(400).json({ error: 'Missing userId' })
 
-      await syncSchedules(userId, [], '')
+      try { await syncSchedules(userId, [], '') } catch {}
       await redis.del(`sub:${userId}`)
 
       return res.status(200).json({ ok: true })
@@ -81,6 +91,6 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' })
   } catch (err) {
     console.error('Subscribe error:', err)
-    return res.status(500).json({ error: 'Server error' })
+    return res.status(500).json({ error: err.message })
   }
 }
