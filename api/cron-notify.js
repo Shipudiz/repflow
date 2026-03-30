@@ -12,7 +12,7 @@ const receiver = new Receiver({
 })
 
 async function sendOneSignalNotification(subscriptionId, title, body) {
-  const resp = await fetch('https://onesignal.com/api/v1/notifications', {
+  const resp = await fetch('https://api.onesignal.com/notifications', {
     method: 'POST',
     headers: {
       'Authorization': `Basic ${process.env.ONESIGNAL_REST_API_KEY}`,
@@ -20,7 +20,7 @@ async function sendOneSignalNotification(subscriptionId, title, body) {
     },
     body: JSON.stringify({
       app_id: process.env.ONESIGNAL_APP_ID,
-      include_subscription_ids: [subscriptionId],
+      include_player_ids: [subscriptionId],
       headings: { en: title },
       contents: { en: body },
     }),
@@ -29,7 +29,6 @@ async function sendOneSignalNotification(subscriptionId, title, body) {
 }
 
 export default async function handler(req, res) {
-  // Verify QStash signature
   try {
     const isValid = await receiver.verify({
       signature: req.headers['upstash-signature'],
