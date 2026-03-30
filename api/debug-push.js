@@ -18,7 +18,15 @@ export default async function handler(req, res) {
     const { Client } = await import('@upstash/qstash')
     const qstash = new Client({ token: process.env.QSTASH_TOKEN })
     const schedules = await qstash.schedules.list()
-    qstashTest = { ok: true, scheduleCount: schedules.length }
+    qstashTest = {
+      ok: true,
+      schedules: schedules.map(s => ({
+        id: s.scheduleId,
+        cron: s.cron,
+        destination: s.destination,
+        body: s.body,
+      })),
+    }
   } catch (err) {
     qstashTest = { error: err.message }
   }
@@ -39,6 +47,9 @@ export default async function handler(req, res) {
         key,
         subscriptionId: data?.subscriptionId || 'NONE',
         reminderCount: data?.reminders?.length || 0,
+        reminders: (data?.reminders || []).map(r => ({
+          id: r.id, label: r.label, time: r.time, enabled: r.enabled, days: r.days,
+        })),
       })
     }
     const schedKeys = await redis.keys('sched:*')
