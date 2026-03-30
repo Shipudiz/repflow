@@ -70,6 +70,34 @@ function TagBadge({ label, variant = 'blue' }) {
   )
 }
 
+// ── Red gradient button (Kegel sessions) ─────────────────────────────────────
+function RedButton({ children, onClick, disabled }) {
+  return (
+    <motion.button
+      onClick={onClick}
+      disabled={disabled}
+      whileTap={!disabled ? { scale: 0.97 } : {}}
+      style={{
+        width: '100%',
+        padding: '16px 32px',
+        background: 'linear-gradient(169deg, #FFB4AA 0%, #FF3B30 100%)',
+        color: '#201f1f',
+        fontFamily: "'Inter', sans-serif",
+        fontWeight: 800,
+        fontSize: 14,
+        border: 'none',
+        borderRadius: 10,
+        cursor: disabled ? 'default' : 'pointer',
+        textTransform: 'uppercase',
+        letterSpacing: '1.4px',
+        opacity: disabled ? 0.5 : 1,
+      }}
+    >
+      {children}
+    </motion.button>
+  )
+}
+
 // ── Blue gradient button ─────────────────────────────────────────────────────
 function BlueButton({ children, onClick, disabled }) {
   return (
@@ -277,13 +305,13 @@ export default function Home({ settings, onStartWorkout, onStartKegel, onNavigat
           {smartSession.done ? (
             <DoneButton />
           ) : smartSession.waiting ? (
-            <BlueButton disabled>
+            <RedButton disabled>
               {smartSession.label}
-            </BlueButton>
+            </RedButton>
           ) : (
-            <BlueButton onClick={() => smartSession.session && onStartKegel(smartSession.session)}>
+            <RedButton onClick={() => smartSession.session && onStartKegel(smartSession.session)}>
               {smartSession.session === 'morning' ? 'START MORNING SESSION' : 'START EVENING SESSION'}
-            </BlueButton>
+            </RedButton>
           )}
         </motion.div>
 

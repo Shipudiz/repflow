@@ -201,31 +201,11 @@ export const KEGEL_WEEKS = [
 ]
 
 export const DEFAULT_SETTINGS = {
-  kegelWeek: 1,
+  kegelWeek: 3,
   morningTime: '10:00',
   eveningTime: '18:00',
   notificationsEnabled: true,
   streakDays: 0,
   lastWorkoutDate: null,
-  completedWorkouts: [
-    { date: '2026-03-22T20:09:35.192Z', workoutId: 'kegel-morning', durationSec: 0 },
-    { date: '2026-03-23T08:01:53.935Z', workoutId: 'kegel-morning', durationSec: 0 },
-    { date: '2026-03-23T14:28:09.623Z', workoutId: 'daily-routine', durationSec: 10 },
-    { date: '2026-03-23T17:02:15.905Z', workoutId: 'kegel-evening', durationSec: 0 },
-    { date: '2026-03-23T18:44:09.402Z', workoutId: 'abs-50-10', durationSec: 577 },
-    { date: '2026-03-24T21:14:14.537Z', workoutId: 'kegel-morning', durationSec: 0 },
-    { date: '2026-03-25T08:01:58.754Z', workoutId: 'kegel-morning', durationSec: 0 },
-    { date: '2026-03-25T16:44:57.698Z', workoutId: 'kegel-evening', durationSec: 0 },
-    { date: '2026-03-26T07:33:33.567Z', workoutId: 'kegel-morning', durationSec: 0 },
-    { date: '2026-03-26T17:15:41.422Z', workoutId: 'abs-30-5', durationSec: 649 },
-    { date: '2026-03-26T17:18:23.373Z', workoutId: 'kegel-evening', durationSec: 0 },
-    { date: '2026-03-26T17:18:57.265Z', workoutId: 'daily-routine', durationSec: 7 },
-    { date: '2026-03-27T09:02:55.314Z', workoutId: 'kegel-morning', durationSec: 0 },
-    { date: '2026-03-27T15:45:01.974Z', workoutId: 'kegel-evening', durationSec: 0 },
-    { date: '2026-03-28T08:17:29.731Z', workoutId: 'kegel-morning', durationSec: 0 },
-    { date: '2026-03-28T09:03:33.034Z', workoutId: 'daily-routine', durationSec: 789 },
-    { date: '2026-03-28T09:12:02.842Z', workoutId: 'twelve-steps', durationSec: 471 },
-    { date: '2026-03-28T15:24:52.008Z', workoutId: 'kegel-evening', durationSec: 0 },
-    { date: '2026-03-29T08:00:00.000Z', workoutId: 'kegel-morning', durationSec: 0 },
-  ],
+  completedWorkouts: [],
 }
