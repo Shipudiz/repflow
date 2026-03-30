@@ -13,41 +13,34 @@ function getUserId() {
   return id
 }
 
-let onesignalReady = false
-let initPromise = null
+let initDone = false
 
 export function useNotifications(settings, onUpdate) {
   const syncRef = useRef(null)
 
-  // Initialize OneSignal once
+  // Initialize OneSignal eagerly on mount — not on button tap
   useEffect(() => {
-    if (onesignalReady || !ONESIGNAL_APP_ID) return
-    onesignalReady = true
+    if (initDone || !ONESIGNAL_APP_ID) return
+    initDone = true
 
-    initPromise = OneSignal.init({
+    OneSignal.init({
       appId: ONESIGNAL_APP_ID,
-      serviceWorkerPath: '/OneSignalSDKWorker.js',
-      serviceWorkerParam: { scope: '/' },
       allowLocalhostAsSecureOrigin: true,
-    }).then(() => {
-      return OneSignal.login(getUserId())
-    }).catch(err => console.warn('OneSignal init:', err))
+    }).then(() => OneSignal.login(getUserId()))
+      .catch(err => console.warn('OneSignal init:', err))
   }, [])
 
+  // Called directly from user tap — NO awaits before permission request
   const subscribe = useCallback(async () => {
     try {
       if (!ONESIGNAL_APP_ID) return { ok: false, reason: 'OneSignal not configured' }
 
-      // Wait for init to complete
-      if (initPromise) await initPromise
-
-      await OneSignal.Notifications.requestPermission()
+      // These must happen in direct response to user tap — no async gaps
       await OneSignal.User.PushSubscription.optIn()
 
       const userId = getUserId()
-      await OneSignal.login(userId)
 
-      // Save userId + reminders to backend (no need for subscription ID)
+      // Save to backend for scheduled reminders
       const resp = await fetch(`${API_BASE}/subscribe`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
