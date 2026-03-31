@@ -178,47 +178,39 @@ function TimerRing({ isSqueeze, totalProgress, totalTimeLeft }) {
 
   const strokeColor = '#6ba3ff'
 
-  // Squeeze circle: trembling animation via CSS keyframes
-  const trembleKeyframes = `
-    @keyframes tremble {
-      0%, 100% { transform: translate(0, 0) scale(1.35); }
-      10% { transform: translate(-2px, 1px) scale(1.36); }
-      20% { transform: translate(2px, -1px) scale(1.34); }
-      30% { transform: translate(-1px, -2px) scale(1.36); }
-      40% { transform: translate(1px, 2px) scale(1.35); }
-      50% { transform: translate(-2px, -1px) scale(1.34); }
-      60% { transform: translate(2px, 1px) scale(1.36); }
-      70% { transform: translate(-1px, 2px) scale(1.35); }
-      80% { transform: translate(1px, -2px) scale(1.34); }
-      90% { transform: translate(-2px, 0px) scale(1.36); }
-    }
-  `
-
   return (
     <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      {/* Inject tremble keyframes */}
-      <style>{trembleKeyframes}</style>
-
-      {/* Squeeze glow circle — behind everything, scales up + trembles on squeeze, gone on release */}
+      {/* Squeeze glow circle — scales up + trembles on squeeze, gone on release */}
+      {/* Outer wrapper: handles tremble via framer-motion repeat */}
       <motion.div
-        animate={{
-          opacity: isSqueeze ? 1 : 0,
-          scale: isSqueeze ? 1.35 : 0.5,
-        }}
-        transition={{
-          opacity: { duration: isSqueeze ? 0.3 : 0.4 },
-          scale: { duration: isSqueeze ? 0.5 : 0.4, ease: [0.16, 1, 0.3, 1] },
-        }}
-        style={{
-          position: 'absolute',
-          width: ringSize,
-          height: ringSize,
-          borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(0,91,230,0) 75%, #005BE6 100%)',
-          pointerEvents: 'none',
-          animation: isSqueeze ? 'tremble 0.15s ease-in-out infinite' : 'none',
-        }}
-      />
+        animate={isSqueeze
+          ? { x: [0, -2, 2, -1, 1, -2, 2, -1, 1, 0], y: [0, 1, -1, -2, 2, -1, 1, 2, -2, 0] }
+          : { x: 0, y: 0 }
+        }
+        transition={isSqueeze
+          ? { duration: 0.2, repeat: Infinity, ease: 'linear' }
+          : { duration: 0.1 }
+        }
+        style={{ position: 'absolute', width: ringSize, height: ringSize, pointerEvents: 'none' }}
+      >
+        {/* Inner: handles scale + opacity */}
+        <motion.div
+          animate={{
+            opacity: isSqueeze ? 1 : 0,
+            scale: isSqueeze ? 1.4 : 0.5,
+          }}
+          transition={{
+            opacity: { duration: isSqueeze ? 0.3 : 0.35 },
+            scale: { duration: isSqueeze ? 0.5 : 0.35, ease: [0.16, 1, 0.3, 1] },
+          }}
+          style={{
+            width: '100%',
+            height: '100%',
+            borderRadius: '50%',
+            background: 'radial-gradient(circle, rgba(0,91,230,0) 55%, rgba(0,91,230,0.4) 75%, #005BE6 100%)',
+          }}
+        />
+      </motion.div>
 
       {/* SVG Ring + timer text */}
       <div style={{ position: 'relative', width: ringSize, height: ringSize }}>
