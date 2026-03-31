@@ -798,12 +798,12 @@ export default function KagelSessionOverlay({ session, week, onClose, onComplete
             </button>
           </div>
 
-          {/* Phase title: SQUEEZE or RELEASE */}
+          {/* Phase title: SQUEEZE or RELEASE — pushed up */}
           <div style={{
-            flex: 1, display: 'flex', flexDirection: 'column',
-            alignItems: 'center', justifyContent: 'center',
-            position: 'relative', zIndex: 2,
-            gap: 8, marginTop: -40,
+            display: 'flex', flexDirection: 'column',
+            alignItems: 'center',
+            position: 'relative', zIndex: 5,
+            gap: 6, marginTop: -16,
           }}>
             <AnimatePresence mode="wait">
               <motion.h1 key={drillState.isSqueeze ? 'squeeze' : 'release'}
@@ -830,17 +830,27 @@ export default function KagelSessionOverlay({ session, week, onClose, onComplete
                 {drillState.isSqueeze ? 'Breathe out' : 'Breathe in, full release'}
               </motion.p>
             </AnimatePresence>
+          </div>
 
-            {/* Timer ring */}
-            <div style={{ marginTop: 16, marginBottom: 8 }}>
-              <TimerRing
-                isSqueeze={drillState.isSqueeze}
-                totalProgress={drillState.totalProgress}
-                totalTimeLeft={drillState.totalTimeLeft}
-              />
-            </div>
+          {/* Timer ring — flex: 1 to take remaining space, centered */}
+          <div style={{
+            flex: 1, display: 'flex', flexDirection: 'column',
+            alignItems: 'center', justifyContent: 'center',
+            position: 'relative', zIndex: 1,
+          }}>
+            <TimerRing
+              isSqueeze={drillState.isSqueeze}
+              totalProgress={drillState.totalProgress}
+              totalTimeLeft={drillState.totalTimeLeft}
+            />
+          </div>
 
-            {/* Exercise type label */}
+          {/* Exercise type label — pushed down */}
+          <div style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            position: 'relative', zIndex: 5,
+            paddingBottom: 20,
+          }}>
             <span style={{
               fontFamily: inter, fontWeight: 400, fontSize: 16,
               color: 'rgba(255,255,255,0.8)',
