@@ -176,24 +176,24 @@ function TimerRing({ isSqueeze, totalProgress, totalTimeLeft }) {
   const dotCx = ringSize / 2 + r * Math.cos(angle)
   const dotCy = ringSize / 2 + r * Math.sin(angle)
 
-  const glowColor = '#005be6'
+  const blueEdge = '#2a6fff'
   const strokeColor = '#6ba3ff'
 
   return (
     <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      {/* Ambient blue glow background — always visible, brighter on squeeze */}
+      {/* Filled circle with reverse radial gradient — blue on edge, fading to center */}
       <motion.div
         animate={{
-          opacity: isSqueeze ? 1 : 0.4,
-          scale: isSqueeze ? 1.05 : 1,
+          opacity: isSqueeze ? 1 : 0.6,
+          scale: isSqueeze ? 1.03 : 1,
         }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
         style={{
           position: 'absolute',
-          width: ringSize + 80,
-          height: ringSize + 80,
+          width: ringSize,
+          height: ringSize,
           borderRadius: '50%',
-          background: `radial-gradient(circle, ${glowColor}40 0%, ${glowColor}20 35%, ${glowColor}0a 55%, transparent 70%)`,
+          background: `radial-gradient(circle, transparent 30%, ${blueEdge}18 55%, ${blueEdge}40 75%, ${blueEdge}60 90%, ${blueEdge}80 100%)`,
           pointerEvents: 'none',
         }}
       />
@@ -202,10 +202,10 @@ function TimerRing({ isSqueeze, totalProgress, totalTimeLeft }) {
       <div style={{ position: 'relative', width: ringSize, height: ringSize }}>
         <svg width={ringSize} height={ringSize} viewBox={`0 0 ${ringSize} ${ringSize}`}
           style={{ position: 'absolute', top: 0, left: 0 }}>
-          {/* Track */}
+          {/* Subtle track */}
           <circle cx={ringSize / 2} cy={ringSize / 2} r={r}
             fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth={strokeW} />
-          {/* Filled arc — always blue */}
+          {/* Progress arc — always blue */}
           <circle cx={ringSize / 2} cy={ringSize / 2} r={r}
             fill="none"
             stroke={strokeColor}
@@ -746,14 +746,15 @@ export default function KagelSessionOverlay({ session, week, onClose, onComplete
           <div style={{
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
             padding: '20px 0 0',
-            position: 'relative', zIndex: 2,
+            position: 'relative', zIndex: 10,
           }}>
             <button onClick={onClose}
               style={{
-                width: 36, height: 36, borderRadius: '50%',
+                width: 44, height: 44, borderRadius: '50%',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 background: 'rgba(255,255,255,0.06)', color: '#8d90a2', fontSize: 14,
-                border: 'none', cursor: 'pointer',
+                border: 'none', cursor: 'pointer', WebkitTapHighlightColor: 'transparent',
+                touchAction: 'manipulation',
               }}>
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                 <path d="M1 1L13 13M13 1L1 13" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
@@ -761,11 +762,12 @@ export default function KagelSessionOverlay({ session, week, onClose, onComplete
             </button>
             <button onClick={() => setIsMuted(m => !m)}
               style={{
-                width: 36, height: 36, borderRadius: '50%',
+                width: 44, height: 44, borderRadius: '50%',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 background: 'rgba(255,255,255,0.06)',
                 color: isMuted ? '#ef4444' : '#8d90a2', fontSize: 16,
-                border: 'none', cursor: 'pointer',
+                border: 'none', cursor: 'pointer', WebkitTapHighlightColor: 'transparent',
+                touchAction: 'manipulation',
               }}>
               {isMuted ? (
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
