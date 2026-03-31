@@ -176,23 +176,24 @@ function TimerRing({ isSqueeze, totalProgress, totalTimeLeft }) {
   const dotCx = ringSize / 2 + r * Math.cos(angle)
   const dotCy = ringSize / 2 + r * Math.sin(angle)
 
-  const glowColor = '#6ba3ff'
+  const glowColor = '#005be6'
+  const strokeColor = '#6ba3ff'
 
   return (
     <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      {/* Outer glow during squeeze */}
+      {/* Ambient blue glow background — always visible, brighter on squeeze */}
       <motion.div
         animate={{
-          opacity: isSqueeze ? 0.7 : 0,
-          scale: isSqueeze ? 1 : 0.85,
+          opacity: isSqueeze ? 1 : 0.4,
+          scale: isSqueeze ? 1.05 : 1,
         }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
         style={{
           position: 'absolute',
-          width: ringSize + 60,
-          height: ringSize + 60,
+          width: ringSize + 80,
+          height: ringSize + 80,
           borderRadius: '50%',
-          background: `radial-gradient(circle, ${glowColor}25 0%, ${glowColor}15 30%, ${glowColor}08 50%, transparent 70%)`,
+          background: `radial-gradient(circle, ${glowColor}40 0%, ${glowColor}20 35%, ${glowColor}0a 55%, transparent 70%)`,
           pointerEvents: 'none',
         }}
       />
@@ -204,10 +205,10 @@ function TimerRing({ isSqueeze, totalProgress, totalTimeLeft }) {
           {/* Track */}
           <circle cx={ringSize / 2} cy={ringSize / 2} r={r}
             fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth={strokeW} />
-          {/* Filled arc */}
+          {/* Filled arc — always blue */}
           <circle cx={ringSize / 2} cy={ringSize / 2} r={r}
             fill="none"
-            stroke={isSqueeze ? glowColor : 'rgba(255,255,255,0.25)'}
+            stroke={strokeColor}
             strokeWidth={strokeW}
             strokeLinecap="round"
             strokeDasharray={circ}
@@ -215,8 +216,8 @@ function TimerRing({ isSqueeze, totalProgress, totalTimeLeft }) {
             style={{
               transform: 'rotate(-90deg)',
               transformOrigin: '50% 50%',
-              filter: isSqueeze ? `drop-shadow(0 0 6px ${glowColor}88)` : 'none',
-              transition: 'stroke 0.4s ease, filter 0.4s ease',
+              filter: `drop-shadow(0 0 ${isSqueeze ? 8 : 4}px ${strokeColor}${isSqueeze ? 'aa' : '55'})`,
+              transition: 'filter 0.4s ease',
             }}
           />
           {/* Dot at head of arc */}
@@ -224,7 +225,7 @@ function TimerRing({ isSqueeze, totalProgress, totalTimeLeft }) {
             <circle
               cx={dotCx} cy={dotCy} r={4}
               fill="white"
-              style={{ filter: isSqueeze ? `drop-shadow(0 0 6px ${glowColor})` : 'drop-shadow(0 0 3px rgba(255,255,255,0.4))' }}
+              style={{ filter: `drop-shadow(0 0 5px ${strokeColor})` }}
             />
           )}
         </svg>
@@ -787,7 +788,7 @@ export default function KagelSessionOverlay({ session, week, onClose, onComplete
             flex: 1, display: 'flex', flexDirection: 'column',
             alignItems: 'center', justifyContent: 'center',
             position: 'relative', zIndex: 2,
-            gap: 8,
+            gap: 8, marginTop: -40,
           }}>
             <AnimatePresence mode="wait">
               <motion.h1 key={drillState.isSqueeze ? 'squeeze' : 'release'}
