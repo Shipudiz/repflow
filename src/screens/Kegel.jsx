@@ -176,35 +176,57 @@ function TimerRing({ isSqueeze, totalProgress, totalTimeLeft }) {
   const dotCx = ringSize / 2 + r * Math.cos(angle)
   const dotCy = ringSize / 2 + r * Math.sin(angle)
 
-  const blueEdge = '#2a6fff'
   const strokeColor = '#6ba3ff'
+
+  // Squeeze circle: trembling animation via CSS keyframes
+  const trembleKeyframes = `
+    @keyframes tremble {
+      0%, 100% { transform: translate(0, 0) scale(1.35); }
+      10% { transform: translate(-2px, 1px) scale(1.36); }
+      20% { transform: translate(2px, -1px) scale(1.34); }
+      30% { transform: translate(-1px, -2px) scale(1.36); }
+      40% { transform: translate(1px, 2px) scale(1.35); }
+      50% { transform: translate(-2px, -1px) scale(1.34); }
+      60% { transform: translate(2px, 1px) scale(1.36); }
+      70% { transform: translate(-1px, 2px) scale(1.35); }
+      80% { transform: translate(1px, -2px) scale(1.34); }
+      90% { transform: translate(-2px, 0px) scale(1.36); }
+    }
+  `
 
   return (
     <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      {/* Filled circle with reverse radial gradient — blue on edge, fading to center */}
+      {/* Inject tremble keyframes */}
+      <style>{trembleKeyframes}</style>
+
+      {/* Squeeze glow circle — behind everything, scales up + trembles on squeeze, gone on release */}
       <motion.div
         animate={{
-          opacity: isSqueeze ? 1 : 0.6,
-          scale: isSqueeze ? 1.03 : 1,
+          opacity: isSqueeze ? 1 : 0,
+          scale: isSqueeze ? 1.35 : 0.5,
         }}
-        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+        transition={{
+          opacity: { duration: isSqueeze ? 0.3 : 0.4 },
+          scale: { duration: isSqueeze ? 0.5 : 0.4, ease: [0.16, 1, 0.3, 1] },
+        }}
         style={{
           position: 'absolute',
           width: ringSize,
           height: ringSize,
           borderRadius: '50%',
-          background: `radial-gradient(circle, transparent 30%, ${blueEdge}18 55%, ${blueEdge}40 75%, ${blueEdge}60 90%, ${blueEdge}80 100%)`,
+          background: 'radial-gradient(circle, rgba(0,91,230,0) 75%, #005BE6 100%)',
           pointerEvents: 'none',
+          animation: isSqueeze ? 'tremble 0.15s ease-in-out infinite' : 'none',
         }}
       />
 
-      {/* SVG Ring */}
+      {/* SVG Ring + timer text */}
       <div style={{ position: 'relative', width: ringSize, height: ringSize }}>
         <svg width={ringSize} height={ringSize} viewBox={`0 0 ${ringSize} ${ringSize}`}
           style={{ position: 'absolute', top: 0, left: 0 }}>
-          {/* Subtle track */}
+          {/* Track */}
           <circle cx={ringSize / 2} cy={ringSize / 2} r={r}
-            fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth={strokeW} />
+            fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth={strokeW} />
           {/* Progress arc — always blue */}
           <circle cx={ringSize / 2} cy={ringSize / 2} r={r}
             fill="none"
@@ -216,8 +238,7 @@ function TimerRing({ isSqueeze, totalProgress, totalTimeLeft }) {
             style={{
               transform: 'rotate(-90deg)',
               transformOrigin: '50% 50%',
-              filter: `drop-shadow(0 0 ${isSqueeze ? 8 : 4}px ${strokeColor}${isSqueeze ? 'aa' : '55'})`,
-              transition: 'filter 0.4s ease',
+              filter: `drop-shadow(0 0 6px ${strokeColor}88)`,
             }}
           />
           {/* Dot at head of arc */}
