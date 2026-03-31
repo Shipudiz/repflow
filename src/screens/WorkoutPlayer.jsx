@@ -224,7 +224,8 @@ export default function WorkoutPlayer({ workout, onClose, onComplete }) {
       style={{
         background: '#131313',
         display: 'flex', flexDirection: 'column',
-        overflow: 'hidden',
+        overflow: 'auto',
+        WebkitOverflowScrolling: 'touch',
       }}
       onPointerDown={() => unlockAudio()}>
 

@@ -14,6 +14,7 @@ export default function App() {
   const [tab, setTab] = useState('home')
   const [activeWorkout, setActiveWorkout] = useState(null)
   const [activeKegel, setActiveKegel] = useState(null) // 'morning' | 'evening' | null
+  const [kegelPreview, setKegelPreview] = useState(null) // drill object for preview mode
   const [settings, setSettings] = useLocalStorage('repflow-settings', DEFAULT_SETTINGS)
 
   const updateSettings = (patch) => setSettings(prev => ({ ...prev, ...patch }))
@@ -53,7 +54,7 @@ export default function App() {
   const currentWeek = KEGEL_WEEKS.find(w => w.week === settings.kegelWeek) || KEGEL_WEEKS[0]
 
   // Check if any overlay is active — hide nav when it is
-  const hasOverlay = !!activeWorkout || !!activeKegel
+  const hasOverlay = !!activeWorkout || !!activeKegel || !!kegelPreview
 
   return (
     <>
@@ -76,7 +77,7 @@ export default function App() {
             <motion.div key="programs" className="absolute inset-0"
               initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}>
-              <Programs onStartWorkout={(w) => setActiveWorkout(w)} settings={settings} />
+              <Programs onStartWorkout={(w) => setActiveWorkout(w)} onPreviewKegel={(drill) => setKegelPreview(drill)} settings={settings} />
             </motion.div>
           )}
           {tab === 'settings' && (
@@ -123,6 +124,23 @@ export default function App() {
               recordWorkout(`kegel-${activeKegel}`)
               setActiveKegel(null)
             }}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Kegel exercise preview (from Library — not counted as session) */}
+      <AnimatePresence>
+        {kegelPreview && (
+          <KagelSessionOverlay
+            session="preview"
+            week={{
+              week: settings.kegelWeek || 1,
+              label: 'Exercise Preview',
+              description: kegelPreview.name,
+              sessions: { preview: [kegelPreview] },
+            }}
+            onClose={() => setKegelPreview(null)}
+            onComplete={() => setKegelPreview(null)}
           />
         )}
       </AnimatePresence>

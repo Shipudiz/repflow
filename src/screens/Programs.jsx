@@ -58,16 +58,17 @@ function BackArrow() {
 }
 
 // ── Category Detail View ─────────────────────────────────────────────────
-function CategoryDetail({ category, onBack, onStartWorkout, settings }) {
+function CategoryDetail({ category, onBack, onStartWorkout, onPreviewKegel, settings }) {
   const isKegel = category.id === 'pelvic'
 
-  // Kegel drills from current week
+  // Kegel drills: merge all unique exercises from current week (no morning/evening split)
   const currentWeek = KEGEL_WEEKS.find(w => w.week === (settings?.kegelWeek || 1)) || KEGEL_WEEKS[0]
-  const kegelDrills = isKegel
-    ? [
-        ...currentWeek.sessions.morning.map((d, i) => ({ ...d, session: 'morning', idx: i })),
-        ...currentWeek.sessions.evening.map((d, i) => ({ ...d, session: 'evening', idx: i })),
-      ]
+  const allDrills = isKegel
+    ? [...currentWeek.sessions.morning, ...currentWeek.sessions.evening]
+    : []
+  // Deduplicate by exercise name
+  const uniqueDrills = isKegel
+    ? allDrills.filter((d, i, arr) => arr.findIndex(x => x.name === d.name) === i)
     : []
 
   const workouts = isKegel ? [] : WORKOUTS.filter(category.workoutFilter || (() => false))
@@ -121,28 +122,37 @@ function CategoryDetail({ category, onBack, onStartWorkout, settings }) {
               {currentWeek.description}
             </p>
 
-            {['morning', 'evening'].map(session => (
-              <div key={session} style={{ marginBottom: 24 }}>
-                <h3 style={{ ...heading, fontSize: 14, fontWeight: 700, color: '#b3c5ff', textTransform: 'uppercase', letterSpacing: 1.2, margin: '0 0 12px' }}>
-                  {session === 'morning' ? 'Morning Session' : 'Evening Session'}
-                </h3>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                  {currentWeek.sessions[session].map((drill, i) => (
-                    <motion.div key={`${session}-${i}`} {...fadeUp(0.1 + i * 0.04)}
-                      style={{ background: '#1c1b1b', padding: '16px 20px', borderRadius: 4, display: 'flex', alignItems: 'center', gap: 16 }}
-                    >
-                      <div style={{ flex: 1 }}>
-                        <p style={{ ...heading, fontSize: 16, fontWeight: 700, color: '#e5e2e1', margin: 0 }}>{drill.name}</p>
-                        <p style={{ ...body, fontSize: 12, color: '#8d90a2', margin: '4px 0 0' }}>
-                          {drill.holdSec}s hold · {drill.restSec}s rest · {drill.reps} reps × {drill.sets} sets
-                        </p>
-                      </div>
-                      <p style={{ ...body, fontSize: 11, color: '#c3c5d9', margin: 0 }}>{drill.cue}</p>
-                    </motion.div>
-                  ))}
-                </div>
-              </div>
-            ))}
+            <h3 style={{ ...heading, fontSize: 14, fontWeight: 700, color: '#b3c5ff', textTransform: 'uppercase', letterSpacing: 1.2, margin: '0 0 12px' }}>
+              Exercises
+            </h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {uniqueDrills.map((drill, i) => (
+                <motion.div key={drill.name} {...fadeUp(0.1 + i * 0.04)}
+                  style={{ background: '#1c1b1b', padding: '16px 20px', borderRadius: 4, display: 'flex', alignItems: 'center', gap: 16 }}
+                >
+                  <div style={{ flex: 1 }}>
+                    <p style={{ ...heading, fontSize: 16, fontWeight: 700, color: '#e5e2e1', margin: 0 }}>{drill.name}</p>
+                    <p style={{ ...body, fontSize: 12, color: '#8d90a2', margin: '4px 0 0' }}>
+                      {drill.holdSec}s hold · {drill.restSec}s rest · {drill.reps} reps × {drill.sets} sets
+                    </p>
+                    <p style={{ ...body, fontSize: 11, color: '#c3c5d9', margin: '4px 0 0' }}>{drill.cue}</p>
+                  </div>
+                  <motion.button
+                    whileTap={{ scale: 0.92 }}
+                    onClick={() => onPreviewKegel && onPreviewKegel(drill)}
+                    style={{
+                      background: 'linear-gradient(169deg, #FFB4AA 0%, #FF3B30 100%)',
+                      border: 'none', borderRadius: 6, cursor: 'pointer',
+                      padding: '10px 16px', flexShrink: 0,
+                    }}
+                  >
+                    <span style={{ ...body, fontSize: 12, fontWeight: 700, color: '#201f1f', textTransform: 'uppercase', letterSpacing: 0.8 }}>
+                      Try
+                    </span>
+                  </motion.button>
+                </motion.div>
+              ))}
+            </div>
           </>
         ) : workouts.length > 0 ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -188,7 +198,7 @@ function CategoryDetail({ category, onBack, onStartWorkout, settings }) {
 }
 
 // ── Main Programs Component ──────────────────────────────────────────────
-export default function Programs({ onStartWorkout, settings }) {
+export default function Programs({ onStartWorkout, onPreviewKegel, settings }) {
   const [search, setSearch] = useState('')
   const [activeCategory, setActiveCategory] = useState(null)
 
@@ -210,6 +220,7 @@ export default function Programs({ onStartWorkout, settings }) {
         category={activeCategory}
         onBack={() => setActiveCategory(null)}
         onStartWorkout={onStartWorkout}
+        onPreviewKegel={onPreviewKegel}
         settings={settings}
       />
     )
