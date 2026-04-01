@@ -49,7 +49,21 @@ export default async function handler(req, res) {
           const totalMinutesUTC = ((totalMinutesLocal + offset) % 1440 + 1440) % 1440
           const utcH = Math.floor(totalMinutesUTC / 60)
           const utcM = totalMinutesUTC % 60
-          const days = reminder.days.length === 7 ? '*' : reminder.days.join(',')
+
+          // When UTC conversion crosses midnight, shift the day-of-week too
+          // dayShift: -1 if UTC time rolled back to previous day, +1 if forward, 0 if same
+          const dayShift = totalMinutesLocal + offset < 0 ? -1
+            : totalMinutesLocal + offset >= 1440 ? 1 : 0
+
+          let days
+          if (reminder.days.length === 7) {
+            days = '*'
+          } else {
+            days = reminder.days
+              .map(d => ((d + dayShift) % 7 + 7) % 7)
+              .sort((a, b) => a - b)
+              .join(',')
+          }
           const cron = `${utcM} ${utcH} * * ${days}`
 
           const schedule = await qstash.schedules.create({

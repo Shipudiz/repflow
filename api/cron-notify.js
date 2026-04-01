@@ -53,10 +53,9 @@ export default async function handler(req, res) {
       return res.status(200).json({ skipped: true, reason: 'Reminder disabled or not found' })
     }
 
-    const today = new Date().getDay()
-    if (!reminder.days.includes(today)) {
-      return res.status(200).json({ skipped: true, reason: 'Not scheduled today' })
-    }
+    // Day-of-week filtering is handled by QStash cron schedule.
+    // Do NOT check getDay() here — server runs in UTC but reminder.days
+    // are in local time, so they won't match when crossing midnight.
 
     const result = await sendOneSignalNotification(
       userId,
