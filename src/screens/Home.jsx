@@ -221,14 +221,17 @@ export default function Home({ settings, onStartWorkout, onStartKegel, onNavigat
   ]
   const doneCount = sessions.filter(s => s.done).length
 
-  // Streak week bars (last 7 days)
-  const weekBars = Array.from({ length: 7 }, (_, i) => {
-    const d = new Date()
-    d.setDate(d.getDate() - (6 - i))
-    const dayStr = d.toDateString()
-    const hasWorkout = (settings.completedWorkouts || []).some(w => new Date(w.date).toDateString() === dayStr)
-    return hasWorkout
-  })
+  // Streak week bars — filled left-to-right based on streak count (max 7)
+  const streakCount = Math.min(streak, 7)
+  const weekBars = Array.from({ length: 7 }, (_, i) => i < streakCount)
+
+  // Last 3 completed workouts (excluding kegel & daily routine), most recent first
+  const lastWorkouts = (settings.completedWorkouts || [])
+    .filter(w => !w.workoutId?.startsWith('kegel-') && w.workoutId !== 'daily-routine')
+    .reverse()
+    .slice(0, 3)
+    .map(w => WORKOUTS.find(wk => wk.id === w.workoutId))
+    .filter(Boolean)
 
   return (
     <div className="scroll-area" style={{ paddingBottom: 110, background: T.bg }}>
@@ -419,68 +422,77 @@ export default function Home({ settings, onStartWorkout, onStartKegel, onNavigat
             LAST WORKOUTS
           </h3>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            {WORKOUTS.map((w, i) => {
-              const totalSec = w.exercises.reduce((sum, ex) =>
-                sum + (ex.workSec || w.workSec) + (ex.restSec ?? w.restSec), 0)
-              const mins = Math.ceil(totalSec / 60)
-              return (
-                <motion.button
-                  key={w.id}
-                  {...fadeUp(0.3 + i * 0.05)}
-                  onClick={() => onStartWorkout(w)}
-                  whileTap={{ scale: 0.97 }}
-                  style={{
-                    width: '100%', textAlign: 'left',
-                    background: T.surface,
-                    borderRadius: 4,
-                    border: 'none',
-                    borderLeft: `2px solid ${T.primary}`,
-                    padding: '16px 16px 16px 18px',
-                    display: 'flex', alignItems: 'center', gap: 14,
-                    cursor: 'pointer',
-                  }}
-                >
-                  {/* Thumbnail */}
-                  <div style={{
-                    width: 80, height: 80, borderRadius: 4,
-                    background: T.track,
-                    overflow: 'hidden',
-                    flexShrink: 0,
-                  }}>
-                    {w.thumb ? (
-                      <img src={w.thumb} alt={w.title}
-                        style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                    ) : (
-                      <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28 }}>
-                        {w.emoji}
-                      </div>
-                    )}
-                  </div>
-
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <p style={{
-                      fontFamily: FONT_HEADING, fontWeight: 700,
-                      fontSize: 14, color: T.textPrimary,
-                      textTransform: 'uppercase', letterSpacing: '-0.35px',
-                      margin: 0,
+          {lastWorkouts.length === 0 ? (
+            <p style={{
+              fontFamily: FONT_BODY, fontSize: 14, color: T.textSecondary,
+              textAlign: 'center', padding: '20px 0',
+            }}>
+              No workouts completed yet. Start one!
+            </p>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              {lastWorkouts.map((w, i) => {
+                const totalSec = w.exercises.reduce((sum, ex) =>
+                  sum + (ex.workSec || w.workSec) + (ex.restSec ?? w.restSec), 0)
+                const mins = Math.ceil(totalSec / 60)
+                return (
+                  <motion.button
+                    key={`${w.id}-${i}`}
+                    {...fadeUp(0.3 + i * 0.05)}
+                    onClick={() => onStartWorkout(w)}
+                    whileTap={{ scale: 0.97 }}
+                    style={{
+                      width: '100%', textAlign: 'left',
+                      background: T.surface,
+                      borderRadius: 4,
+                      border: 'none',
+                      borderLeft: `2px solid ${T.primary}`,
+                      padding: '16px 16px 16px 18px',
+                      display: 'flex', alignItems: 'center', gap: 14,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {/* Thumbnail */}
+                    <div style={{
+                      width: 80, height: 80, borderRadius: 4,
+                      background: T.track,
+                      overflow: 'hidden',
+                      flexShrink: 0,
                     }}>
-                      {w.title}
-                    </p>
-                    <p style={{
-                      fontFamily: FONT_BODY, fontWeight: 400,
-                      fontSize: 12, color: T.textSecondary,
-                      margin: '4px 0 0',
-                    }}>
-                      {w.exercises.length} exercises &middot; ~{mins} min
-                    </p>
-                  </div>
+                      {w.thumb ? (
+                        <img src={w.thumb} alt={w.title}
+                          style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      ) : (
+                        <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28 }}>
+                          {w.emoji}
+                        </div>
+                      )}
+                    </div>
 
-                  <PlayIcon />
-                </motion.button>
-              )
-            })}
-          </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p style={{
+                        fontFamily: FONT_HEADING, fontWeight: 700,
+                        fontSize: 14, color: T.textPrimary,
+                        textTransform: 'uppercase', letterSpacing: '-0.35px',
+                        margin: 0,
+                      }}>
+                        {w.title}
+                      </p>
+                      <p style={{
+                        fontFamily: FONT_BODY, fontWeight: 400,
+                        fontSize: 12, color: T.textSecondary,
+                        margin: '4px 0 0',
+                      }}>
+                        {w.exercises.length} exercises &middot; ~{mins} min
+                      </p>
+                    </div>
+
+                    <PlayIcon />
+                  </motion.button>
+                )
+              })}
+            </div>
+          )}
         </motion.div>
 
       </div>
