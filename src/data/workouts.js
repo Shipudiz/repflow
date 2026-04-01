@@ -8,7 +8,7 @@ export const WORKOUTS = [
   // ─── WORKOUT 1: 10 Min Abs — 30 sec work / 5 sec rest ───────────────────
   {
     id: 'abs-30-5',
-    title: '30/5',
+    title: '#1 Abs 30/5',
     subtitle: '30 sec work · 5 sec rest',
     emoji: '🔥',
     thumb: '/workouts/abs-30-5-thumb.png',
@@ -42,7 +42,7 @@ export const WORKOUTS = [
   // ─── WORKOUT 2: 10 Min Abs — 50 sec work / 10 sec rest ──────────────────
   {
     id: 'abs-50-10',
-    title: '50/10',
+    title: '#2 Abs 50/10',
     subtitle: '50 sec work · 10 sec rest',
     emoji: '💪',
     thumb: '/workouts/abs-50-10-thumb.png',
@@ -69,7 +69,7 @@ export const WORKOUTS = [
   // ─── WORKOUT 3: Abs 50/10 v2 — 10 min ──────────────────────────────────────
   {
     id: 'abs-50-10-v2',
-    title: 'Abs 50/10',
+    title: '#3 Abs 50/10',
     subtitle: '50 sec work · 10 sec rest',
     emoji: '🔥',
     thumb: '/workouts/abs-50-10-v2-thumb.png',
@@ -96,7 +96,7 @@ export const WORKOUTS = [
   // ─── WORKOUT 4: Abs 30/5 v2 — 5 min ───────────────────────────────────────
   {
     id: 'abs-30-5-v2',
-    title: 'Abs 30/5',
+    title: '#4 Abs 30/5',
     subtitle: '30 sec work · 5 sec rest',
     emoji: '⚡',
     thumb: '/workouts/abs-30-5-v2-thumb.png',
@@ -123,7 +123,7 @@ export const WORKOUTS = [
   // ─── WORKOUT 5: Daily Routine — mixed 30s / 60s ────────────────────────────
   {
     id: 'daily-routine',
-    title: 'Daily Routine',
+    title: '#5 Daily Routine',
     subtitle: 'Mobility & flow · no rest',
     emoji: '🌅',
     thumb: '/workouts/daily-routine-thumb.png',
@@ -156,7 +156,7 @@ export const WORKOUTS = [
   // ─── WORKOUT 4: 12 Steps Short Workout — 30s work / 10s rest ──────────────
   {
     id: 'twelve-steps',
-    title: '12 Steps',
+    title: '#6 12 Steps',
     subtitle: '30 sec work · 10 sec rest',
     emoji: '⚡',
     thumb: '/workouts/twelve-steps-thumb.png',
@@ -185,7 +185,7 @@ export const WORKOUTS = [
   // ─── WORKOUT 7: Full Body — 20 min ──────────────────────────────────────────
   {
     id: 'full-body-1',
-    title: 'Full Body',
+    title: '#7 Full Body',
     subtitle: '60/30 & 30/30 mix · 20 min',
     emoji: '💥',
     thumb: '/workouts/full-body-1-thumb.png',

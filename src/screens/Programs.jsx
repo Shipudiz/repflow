@@ -405,7 +405,6 @@ export default function Programs({ onStartWorkout, onPreviewKegel, settings }) {
                       <p style={{ ...heading, fontSize: 18, fontWeight: 700, letterSpacing: -0.45, textTransform: 'uppercase', margin: 0, lineHeight: 1.2 }}>{w.title}</p>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginTop: 6 }}>
                         <span style={{ ...body, fontSize: 10, fontWeight: 400, color: '#8d90a2', textTransform: 'uppercase', letterSpacing: 1 }}>{mins} MIN</span>
-                        <span style={{ ...body, fontSize: 10, fontWeight: 600, color: '#c3c5d9', textTransform: 'uppercase', letterSpacing: 1 }}>ALL LEVELS</span>
                       </div>
                     </div>
                     <motion.button whileTap={{ scale: 0.92 }} onClick={() => onStartWorkout(w)}

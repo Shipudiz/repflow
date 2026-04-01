@@ -272,7 +272,7 @@ export default function WorkoutPlayer({ workout, onClose, onComplete }) {
           </button>
         </div>
 
-        {/* Exercise name */}
+        {/* Exercise name + animation area */}
         <AnimatePresence mode="wait">
           <motion.div key={`name-${exIdx}-${phase}`}
             initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }}
@@ -286,31 +286,42 @@ export default function WorkoutPlayer({ workout, onClose, onComplete }) {
               textTransform: 'uppercase', letterSpacing: '-1px',
               maxWidth: 200, margin: '0 auto', lineHeight: 1.2,
             }}>
-              {phase === PHASE.REST ? (nextEx ? nextEx.name : 'REST') : phase === PHASE.COUNTDOWN ? 'GET READY' : current.name}
+              {phase === PHASE.COUNTDOWN ? 'GET READY' : phase === PHASE.REST ? 'REST' : current.name}
             </h2>
-          </motion.div>
-        </AnimatePresence>
-
-        {/* Exercise animation area */}
-        <AnimatePresence mode="wait">
-          <motion.div key={`anim-${exIdx}`}
-            initial={{ opacity: 0, scale: 0.92 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}
-            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            style={{
-              width: 168, height: 122, margin: '0 auto 16px',
-              position: 'relative', zIndex: 1,
-            }}>
-            {(phase === PHASE.REST && nextEx?.gif || current.gif) ? (
-              <img
-                src={phase === PHASE.REST && nextEx ? nextEx.gif : current.gif}
-                alt={phase === PHASE.REST && nextEx ? nextEx.name : current.name}
-                style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: 6 }}
-              />
-            ) : (
-              <ExerciseAnimation animType={phase === PHASE.REST && nextEx ? nextEx.anim : current.anim} color={workout.color} />
+            {phase === PHASE.REST && nextEx && (
+              <p style={{
+                fontFamily: "'Inter', sans-serif",
+                fontWeight: 400, fontSize: 13, color: '#8d90a2',
+                margin: '6px 0 0', textTransform: 'none',
+              }}>
+                Next up: {nextEx.name}
+              </p>
             )}
           </motion.div>
         </AnimatePresence>
+
+        {/* Exercise animation — only during WORK phase */}
+        {phase === PHASE.WORK && (
+          <AnimatePresence mode="wait">
+            <motion.div key={`anim-${exIdx}`}
+              initial={{ opacity: 0, scale: 0.92 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}
+              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+              style={{
+                width: 168, height: 122, margin: '0 auto 16px',
+                position: 'relative', zIndex: 1,
+              }}>
+              {current.gif ? (
+                <img
+                  src={current.gif}
+                  alt={current.name}
+                  style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: 6 }}
+                />
+              ) : (
+                <ExerciseAnimation animType={current.anim} color={workout.color} />
+              )}
+            </motion.div>
+          </AnimatePresence>
+        )}
 
         {/* Timer ring */}
         <div style={{
