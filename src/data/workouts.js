@@ -66,7 +66,61 @@ export const WORKOUTS = [
     ]
   },
 
-  // ─── WORKOUT 3: Daily Routine — mixed 30s / 60s ────────────────────────────
+  // ─── WORKOUT 3: Abs 50/10 v2 — 10 min ──────────────────────────────────────
+  {
+    id: 'abs-50-10-v2',
+    title: 'Abs 50/10',
+    subtitle: '50 sec work · 10 sec rest',
+    emoji: '🔥',
+    thumb: '/workouts/abs-50-10-v2-thumb.png',
+    color: '#8b5cf6',
+    glow: 'rgba(139,92,246,0.3)',
+    workSec: 50,
+    restSec: 10,
+    category: 'abs',
+    type: 'timed',
+    exercises: [
+      { id: 'reverse-crunches-3',    gif: '/workouts/abs-50-10-v2/reverse-crunches.gif',           name: 'Reverse Crunches',           anim: 'reverse-crunch', cue: 'Lift hips, not just legs' },
+      { id: 'leg-raises-3',          gif: '/workouts/abs-50-10-v2/leg-raises.gif',                 name: 'Leg Raises',                 anim: 'leg-raise',      cue: 'Slow & controlled' },
+      { id: 'scissor-crossovers-3',  gif: '/workouts/abs-50-10-v2/scissor-crossovers.gif',         name: 'Scissor Crossovers',         anim: 'scissors',       cue: 'Cross & uncross with control' },
+      { id: 'slow-bicycles',         gif: '/workouts/abs-50-10-v2/slow-bicycles.gif',              name: 'Slow Bicycles',              anim: 'bicycle',        cue: 'Slow and deliberate each rep' },
+      { id: 'leg-switches-3',        gif: '/workouts/abs-50-10-v2/leg-switches.gif',               name: 'Leg Switches',               anim: 'leg-switch',     cue: 'Alternate legs fast' },
+      { id: 'straight-leg-sit-up',   gif: '/workouts/abs-50-10-v2/straight-leg-sit-up-twists.gif', name: 'Straight Leg Sit Up Twists', anim: 'seated-twist',   cue: 'Full sit-up with rotation' },
+      { id: 'frog-crunches',         gif: '/workouts/abs-50-10-v2/frog-crunches.gif',              name: 'Frog Crunches',              anim: 'butterfly',      cue: 'Soles together, crunch up' },
+      { id: 'cocoons',               gif: '/workouts/abs-50-10-v2/cocoons.gif',                    name: 'Cocoons',                    anim: 'extend-tuck',    cue: 'Extend fully, tuck in tight' },
+      { id: 'heel-taps-3',           gif: '/workouts/abs-50-10-v2/heel-taps.gif',                  name: 'Heel Taps',                  anim: 'heel-tap',       cue: 'Side to side, feel the obliques' },
+      { id: 'hollow-hold-3',         gif: '/workouts/abs-50-10-v2/hollow-hold.gif',                name: 'Hollow Hold',                anim: 'hollow',         cue: 'Press lower back to floor' },
+    ]
+  },
+
+  // ─── WORKOUT 4: Abs 30/5 v2 — 5 min ───────────────────────────────────────
+  {
+    id: 'abs-30-5-v2',
+    title: 'Abs 30/5',
+    subtitle: '30 sec work · 5 sec rest',
+    emoji: '⚡',
+    thumb: '/workouts/abs-30-5-v2-thumb.png',
+    color: '#f97316',
+    glow: 'rgba(249,115,22,0.3)',
+    workSec: 30,
+    restSec: 5,
+    category: 'abs',
+    type: 'timed',
+    exercises: [
+      { id: 'lower-crunches',        gif: '/workouts/abs-30-5-v2/lower-crunches.gif',         name: 'Lower Crunches',         anim: 'crunch',         cue: 'Focus on lower abs' },
+      { id: 'leg-raises-4',          gif: '/workouts/abs-30-5-v2/leg-raises.gif',             name: 'Leg Raises',             anim: 'leg-raise',      cue: 'Slow & controlled' },
+      { id: 'flutter-kicks-4',       gif: '/workouts/abs-30-5-v2/flutter-kicks.gif',          name: 'Flutter Kicks',          anim: 'flutter',        cue: 'Keep lower back flat' },
+      { id: 'v-sit-crunches',        gif: '/workouts/abs-30-5-v2/v-sit-crunches.gif',         name: 'V-Sit Crunches',         anim: 'crunch',         cue: 'Reach for your toes' },
+      { id: 'cross-mountain',        gif: '/workouts/abs-30-5-v2/cross-mountain-climbers.gif',name: 'Cross Mountain Climbers',anim: 'mountain',       cue: 'Knee to opposite elbow' },
+      { id: 'plank-step-outs',       gif: '/workouts/abs-30-5-v2/plank-step-outs.gif',        name: 'Plank Step Outs',        anim: 'plank-knee',     cue: 'Step wide, stay stable' },
+      { id: 'spiderman-crunches',    gif: '/workouts/abs-30-5-v2/spiderman-crunches.gif',     name: 'Spiderman Crunches',     anim: 'spider',         cue: 'Knee to same-side elbow' },
+      { id: 'alt-leg-raises',        gif: '/workouts/abs-30-5-v2/alternating-leg-raises.gif', name: 'Alternating Leg Raises', anim: 'leg-raise',      cue: 'One leg at a time' },
+      { id: 'lying-bicycles',        gif: '/workouts/abs-30-5-v2/lying-bicycles.gif',         name: 'Lying Bicycles',         anim: 'bicycle',        cue: 'Slow pedaling motion' },
+      { id: 'tabletop-crunch-pulse', gif: '/workouts/abs-30-5-v2/tabletop-crunch-pulses.gif', name: 'Tabletop Crunch Pulses', anim: 'crunch',         cue: 'Small controlled pulses' },
+    ]
+  },
+
+  // ─── WORKOUT 5: Daily Routine — mixed 30s / 60s ────────────────────────────
   {
     id: 'daily-routine',
     title: 'Daily Routine',
@@ -125,6 +179,43 @@ export const WORKOUTS = [
       { id: 'strikes',        name: 'Strikes',               anim: 'strikes',       cue: 'Alternate punches, twist from hips' },
       { id: 'jumps',          name: 'Jumps',                 anim: 'jumps',         cue: 'Soft landing, explode back up' },
       { id: 'plank-12',       name: 'Plank',                 anim: 'plank-hold',    cue: 'Straight line — squeeze everything' },
+    ]
+  },
+
+  // ─── WORKOUT 7: Full Body — 20 min ──────────────────────────────────────────
+  {
+    id: 'full-body-1',
+    title: 'Full Body',
+    subtitle: '60/30 & 30/30 mix · 20 min',
+    emoji: '💥',
+    thumb: '/workouts/full-body-1-thumb.png',
+    color: '#06b6d4',
+    glow: 'rgba(6,182,212,0.3)',
+    workSec: 60,
+    restSec: 30,
+    category: 'fullbody',
+    type: 'timed',
+    exercises: [
+      { id: 'fb-jumping-jacks',     gif: '/workouts/full-body-1/jumping-jacks.gif',      name: 'Jumping Jacks',        anim: 'jumps',           cue: 'Full arm extension, land soft' },
+      { id: 'fb-burpees',           gif: '/workouts/full-body-1/burpees.gif',            name: 'Burpees',              anim: 'burpee',          cue: 'Drop, push, jump — full send' },
+      { id: 'fb-lunge-jumps',       gif: '/workouts/full-body-1/lunge-jumps.gif',        name: 'Lunge Jumps',          anim: 'lunge',           cue: 'Alternate legs, explode up' },
+      { id: 'fb-plank',             gif: '/workouts/full-body-1/plank.gif',              name: 'Plank',                anim: 'plank-hold',      cue: 'Straight line — squeeze everything' },
+      { id: 'fb-steam-engine',      gif: '/workouts/full-body-1/steam-engine-squats.gif',name: 'Steam Engine Squats',  anim: 'squat',           cue: 'Elbow to knee as you squat' },
+      { id: 'fb-reverse-crunch',    gif: '/workouts/full-body-1/reverse-crunch.gif',     name: 'Reverse Crunch',       anim: 'reverse-crunch',  cue: 'Lift hips, not just legs' },
+      { id: 'fb-side-plank-r',      gif: '/workouts/full-body-1/side-plank-r.png',       name: 'Side Plank R',         anim: 'side-plank-r',    cue: 'Stack hips, reach up' },
+      { id: 'fb-side-plank-l',      gif: '/workouts/full-body-1/side-plank-l.png',       name: 'Side Plank L',         anim: 'side-plank-l',    cue: 'Stack hips, reach up' },
+      { id: 'fb-push-up-slow',      gif: '/workouts/full-body-1/push-up-slow.gif',       name: 'Push Up (Slow)',       anim: 'push-up',         cue: '3 sec down, 1 sec up' },
+      { id: 'fb-supermans',         gif: '/workouts/full-body-1/supermans.gif',           name: 'Supermans',            anim: 'prone-cobra',     cue: 'Lift arms & legs together' },
+      { id: 'fb-elbow-planks',      gif: '/workouts/full-body-1/elbow-planks.png',        name: 'Elbow Planks',         anim: 'plank-hold',      cue: 'Forearms flat, body straight', workSec: 30 },
+      { id: 'fb-jump-ropes',        gif: '/workouts/full-body-1/jump-ropes.gif',          name: 'Jump Ropes',           anim: 'jumps',           cue: 'Light bounces, wrists spin' },
+      { id: 'fb-plank-ups',         gif: '/workouts/full-body-1/plank-ups.gif',           name: 'Plank Ups',            anim: 'plank-knee',      cue: 'High plank to low plank' },
+      { id: 'fb-calf-raise-r',      gif: '/workouts/full-body-1/calf-raise-r.gif',       name: 'Calf Raise R',         anim: 'calf-raise',      cue: 'Squeeze at top, slow lower', workSec: 30 },
+      { id: 'fb-calf-raise-l',      gif: '/workouts/full-body-1/calf-raise-l.gif',       name: 'Calf Raise L',         anim: 'calf-raise',      cue: 'Squeeze at top, slow lower', workSec: 30 },
+      { id: 'fb-squat-jumps',       gif: '/workouts/full-body-1/squat-jumps.gif',         name: 'Squat Jumps',          anim: 'squat',           cue: 'Deep squat, explode up', workSec: 30 },
+      { id: 'fb-prone-cobra',       gif: '/workouts/full-body-1/prone-cobra.gif',         name: 'Prone Cobra',          anim: 'prone-cobra',     cue: 'Lift chest, squeeze glutes', workSec: 30 },
+      { id: 'fb-push-ups',          gif: '/workouts/full-body-1/push-ups.gif',            name: 'Push Ups',             anim: 'push-up',         cue: 'Chest to floor, full extension', workSec: 30 },
+      { id: 'fb-ankle-taps',        gif: '/workouts/full-body-1/ankle-taps.gif',          name: 'Ankle Taps',           anim: 'heel-tap',        cue: 'Side to side, feel the stretch', workSec: 30 },
+      { id: 'fb-pike-push-ups',     gif: '/workouts/full-body-1/pike-push-ups.gif',       name: 'Pike Push Ups',        anim: 'pike-push-up',    cue: 'Hips high, head between arms', workSec: 30 },
     ]
   },
 ]

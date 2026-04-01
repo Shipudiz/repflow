@@ -675,11 +675,6 @@ const animMap = {
 
 export default function ExerciseAnimation({ animType, color = '#f97316' }) {
   const Comp = animMap[animType]
-  if (!Comp) return (
-    <svg viewBox="0 0 160 120" className="w-full h-full">
-      <circle cx={80} cy={60} r={40} fill="none" stroke={color} strokeWidth="2" opacity={0.3} />
-      <text x={80} y={68} textAnchor="middle" fill={color} fontSize="24">?</text>
-    </svg>
-  )
+  if (!Comp) return null
   return <Comp color={color} />
 }
