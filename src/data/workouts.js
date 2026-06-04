@@ -182,10 +182,48 @@ export const WORKOUTS = [
     ]
   },
 
-  // ─── WORKOUT 7: Full Body — 20 min ──────────────────────────────────────────
+  // ─── WORKOUT 7: Kettlebell — 15 min ─────────────────────────────────────────
+  {
+    id: 'kettlebell-15',
+    title: '#7 Kettlebell',
+    subtitle: '30 sec work · 30 sec rest · 3 rounds',
+    emoji: '🏋️',
+    thumb: '/workouts/kettlebell/01-swing squat.gif',
+    color: '#f59e0b',
+    glow: 'rgba(245,158,11,0.3)',
+    workSec: 30,
+    restSec: 30,
+    category: 'fullbody',
+    type: 'timed',
+    exercises: [
+      // Round 1
+      { id: 'kb-swing-squat-1',        gif: '/workouts/kettlebell/01-swing squat.gif',              name: 'Swing Squat',             anim: 'squat',      cue: 'Hinge at hips, drive through heels',    round: 1 },
+      { id: 'kb-clean-halo-1',         gif: '/workouts/kettlebell/02-Clean Halo.gif',               name: 'Clean Halo',              anim: 'lunge',      cue: 'Tight arc around head, stay slow',      round: 1 },
+      { id: 'kb-pop-squats-1',         gif: '/workouts/kettlebell/03-pop squats.gif',               name: 'Pop Squats',              anim: 'squat',      cue: 'Explode up, soft landing',              round: 1 },
+      { id: 'kb-side-shoulder-1',      gif: '/workouts/kettlebell/04-side to side over shoulder.gif',name: 'Side to Side Over Shoulder',anim: 'lunge',   cue: 'Control the pass, brace core',          round: 1 },
+      { id: 'kb-body-lunge-1',         gif: '/workouts/kettlebell/05-around the body lunge.gif',    name: 'Around the Body Lunge',   anim: 'lunge',      cue: 'Full orbit, keep weight stable',        round: 1 },
+      { id: 'kb-alt-clean-1',          gif: '/workouts/kettlebell/06-alternating clean.gif',        name: 'Alternating Clean',       anim: 'squat',      cue: 'Pull from hips, rack at shoulder',      round: 1 },
+      // Round 2
+      { id: 'kb-swing-squat-2',        gif: '/workouts/kettlebell/01-swing squat.gif',              name: 'Swing Squat',             anim: 'squat',      cue: 'Hinge at hips, drive through heels',    round: 2 },
+      { id: 'kb-clean-halo-2',         gif: '/workouts/kettlebell/02-Clean Halo.gif',               name: 'Clean Halo',              anim: 'lunge',      cue: 'Tight arc around head, stay slow',      round: 2 },
+      { id: 'kb-pop-squats-2',         gif: '/workouts/kettlebell/03-pop squats.gif',               name: 'Pop Squats',              anim: 'squat',      cue: 'Explode up, soft landing',              round: 2 },
+      { id: 'kb-side-shoulder-2',      gif: '/workouts/kettlebell/04-side to side over shoulder.gif',name: 'Side to Side Over Shoulder',anim: 'lunge',   cue: 'Control the pass, brace core',          round: 2 },
+      { id: 'kb-body-lunge-2',         gif: '/workouts/kettlebell/05-around the body lunge.gif',    name: 'Around the Body Lunge',   anim: 'lunge',      cue: 'Full orbit, keep weight stable',        round: 2 },
+      { id: 'kb-alt-clean-2',          gif: '/workouts/kettlebell/06-alternating clean.gif',        name: 'Alternating Clean',       anim: 'squat',      cue: 'Pull from hips, rack at shoulder',      round: 2 },
+      // Round 3
+      { id: 'kb-swing-squat-3',        gif: '/workouts/kettlebell/01-swing squat.gif',              name: 'Swing Squat',             anim: 'squat',      cue: 'Last round — push harder',              round: 3 },
+      { id: 'kb-clean-halo-3',         gif: '/workouts/kettlebell/02-Clean Halo.gif',               name: 'Clean Halo',              anim: 'lunge',      cue: 'Tight arc around head, stay slow',      round: 3 },
+      { id: 'kb-pop-squats-3',         gif: '/workouts/kettlebell/03-pop squats.gif',               name: 'Pop Squats',              anim: 'squat',      cue: 'Finish strong',                         round: 3 },
+      { id: 'kb-side-shoulder-3',      gif: '/workouts/kettlebell/04-side to side over shoulder.gif',name: 'Side to Side Over Shoulder',anim: 'lunge',   cue: 'Control the pass, brace core',          round: 3 },
+      { id: 'kb-body-lunge-3',         gif: '/workouts/kettlebell/05-around the body lunge.gif',    name: 'Around the Body Lunge',   anim: 'lunge',      cue: 'Full orbit, keep weight stable',        round: 3 },
+      { id: 'kb-alt-clean-3',          gif: '/workouts/kettlebell/06-alternating clean.gif',        name: 'Alternating Clean',       anim: 'squat',      cue: 'Pull from hips, finish clean',          round: 3 },
+    ]
+  },
+
+  // ─── WORKOUT 8: Full Body — 20 min ──────────────────────────────────────────
   {
     id: 'full-body-1',
-    title: '#7 Full Body',
+    title: '#8 Full Body',
     subtitle: '60/30 & 30/30 mix · 20 min',
     emoji: '💥',
     thumb: '/workouts/full-body-1-thumb.png',
@@ -222,70 +260,119 @@ export const WORKOUTS = [
 
 // ─── KEGEL PROGRAM ──────────────────────────────────────────────────────────
 export const KEGEL_WEEKS = [
-  // ── Week 1–2: ~5 min sessions ─────────────────────────────────────────
+  // ── Week 1: Foundation — ~5 min ───────────────────────────────────────
   {
-    week: 1, label: 'Week 1–2 · Learning',
-    description: 'Isolate the muscle. Lying position only.',
+    week: 1, label: 'Week 1 · Foundation',
+    description: 'Learn to isolate. Lying only. Short holds, big focus on full release.',
     sessions: {
       morning: [
-        { name: 'Long Hold',    holdSec: 3, restSec: 3, reps: 12, sets: 3, anim: 'kegel-breathe', cue: 'Breathe out on squeeze ↑' },
-        { name: 'Quick Flicks', holdSec: 1, restSec: 1, reps: 20, sets: 2, anim: 'kegel-flick',   cue: 'Fast contract & release' },
+        { name: 'Long Hold',    holdSec: 3,  restSec: 4, reps: 10, sets: 3, anim: 'kegel-breathe', cue: 'Breathe out on squeeze ↑' },
+        { name: 'Quick Flicks', holdSec: 1,  restSec: 1, reps: 15, sets: 2, anim: 'kegel-flick',   cue: 'Contract fast, release fully' },
       ],
       evening: [
-        { name: 'Long Hold',    holdSec: 3, restSec: 3, reps: 12, sets: 3, anim: 'kegel-breathe', cue: 'Full release between reps' },
-        { name: 'Quick Flicks', holdSec: 1, restSec: 1, reps: 20, sets: 2, anim: 'kegel-flick',   cue: 'Control the release' },
+        { name: 'Long Hold',    holdSec: 3,  restSec: 4, reps: 10, sets: 2, anim: 'kegel-breathe', cue: 'Full release every rep' },
+        { name: 'Quick Flicks', holdSec: 1,  restSec: 1, reps: 20, sets: 3, anim: 'kegel-flick',   cue: 'Speed with control' },
       ]
     }
   },
-  // ── Week 3–4: ~7 min sessions ─────────────────────────────────────────
+  // ── Week 2: Consistency — ~6 min ──────────────────────────────────────
   {
-    week: 3, label: 'Week 3–4 · Building',
-    description: 'Add Elevator & Reverse. Try seated position.',
+    week: 2, label: 'Week 2 · Consistency',
+    description: 'Same moves, longer holds. Start noticing the difference between squeeze and release.',
     sessions: {
       morning: [
-        { name: 'Long Hold',       holdSec: 5, restSec: 5, reps: 10, sets: 3, anim: 'kegel-breathe', cue: 'Hold steady — no breath-holding' },
+        { name: 'Long Hold',    holdSec: 5,  restSec: 4, reps: 12, sets: 3, anim: 'kegel-breathe', cue: 'Count to 5, breathe steady' },
+        { name: 'Quick Flicks', holdSec: 1,  restSec: 1, reps: 20, sets: 2, anim: 'kegel-flick',   cue: 'Rapid fire — full release each time' },
+      ],
+      evening: [
+        { name: 'Long Hold',    holdSec: 4,  restSec: 3, reps: 15, sets: 2, anim: 'kegel-breathe', cue: 'Try seated position today' },
+        { name: 'Quick Flicks', holdSec: 1,  restSec: 1, reps: 25, sets: 2, anim: 'kegel-flick',   cue: 'Stay relaxed everywhere else' },
+      ]
+    }
+  },
+  // ── Week 3: New Skills — ~7 min ───────────────────────────────────────
+  {
+    week: 3, label: 'Week 3 · New Skills',
+    description: 'Elevator unlocked. Morning builds strength, evening adds the new technique.',
+    sessions: {
+      morning: [
+        { name: 'Long Hold',       holdSec: 5, restSec: 5, reps: 12, sets: 3, anim: 'kegel-breathe', cue: 'Hold steady — no breath-holding' },
         { name: 'Quick Flicks',    holdSec: 1, restSec: 1, reps: 20, sets: 2, anim: 'kegel-flick',   cue: 'Rapid fire' },
-        { name: 'Elevator Kegels', holdSec: 3, restSec: 3, reps: 5,  sets: 2, anim: 'kegel-elevator',cue: '4 floors up, 4 floors down' },
+        { name: 'Elevator Kegels', holdSec: 4, restSec: 4, reps: 5,  sets: 2, anim: 'kegel-elevator',cue: '4 floors up, pause at each' },
       ],
       evening: [
-        { name: 'Long Hold',       holdSec: 5, restSec: 5, reps: 10, sets: 2, anim: 'kegel-breathe', cue: 'Try seated position' },
-        { name: 'Quick Flicks',    holdSec: 1, restSec: 1, reps: 15, sets: 2, anim: 'kegel-flick',   cue: 'Stay relaxed between flicks' },
-        { name: 'Reverse Kegels',  holdSec: 5, restSec: 5, reps: 8,  sets: 2, anim: 'kegel-reverse', cue: 'Active release & lengthen' },
+        { name: 'Elevator Kegels', holdSec: 4, restSec: 4, reps: 6,  sets: 2, anim: 'kegel-elevator',cue: 'Go slow — feel each floor' },
+        { name: 'Long Hold',       holdSec: 5, restSec: 5, reps: 10, sets: 2, anim: 'kegel-breathe', cue: 'Try seated' },
+        { name: 'Quick Flicks',    holdSec: 1, restSec: 1, reps: 20, sets: 2, anim: 'kegel-flick',   cue: 'Stay relaxed between flicks' },
       ]
     }
   },
-  // ── Week 5–6: ~10 min sessions ────────────────────────────────────────
+  // ── Week 4: Reverse — ~8 min ──────────────────────────────────────────
   {
-    week: 5, label: 'Week 5–6 · Endurance',
-    description: '8-second holds. Add standing position.',
+    week: 4, label: 'Week 4 · Reverse',
+    description: 'Reverse Kegels introduced. Balances the program — release is a skill too.',
     sessions: {
       morning: [
-        { name: 'Long Hold',       holdSec: 8, restSec: 8, reps: 10, sets: 3, anim: 'kegel-breathe', cue: 'Try standing position' },
+        { name: 'Long Hold',       holdSec: 6, restSec: 5, reps: 10, sets: 3, anim: 'kegel-breathe', cue: 'Strong hold, full release' },
+        { name: 'Elevator Kegels', holdSec: 4, restSec: 4, reps: 6,  sets: 2, anim: 'kegel-elevator',cue: 'Smooth 4-floor sequence' },
         { name: 'Quick Flicks',    holdSec: 1, restSec: 1, reps: 20, sets: 2, anim: 'kegel-flick',   cue: 'Max speed' },
-        { name: 'Elevator Kegels', holdSec: 3, restSec: 3, reps: 6,  sets: 2, anim: 'kegel-elevator',cue: 'Full 4-floor sequence' },
       ],
       evening: [
-        { name: 'Long Hold',       holdSec: 8, restSec: 8, reps: 10, sets: 2, anim: 'kegel-breathe', cue: 'Breathe — don\'t hold breath' },
-        { name: 'Quick Flicks',    holdSec: 1, restSec: 1, reps: 20, sets: 2, anim: 'kegel-flick',   cue: 'Quick bursts, full release' },
+        { name: 'Reverse Kegels',  holdSec: 5, restSec: 5, reps: 8,  sets: 2, anim: 'kegel-reverse', cue: 'Active lengthen — no straining' },
+        { name: 'Long Hold',       holdSec: 6, restSec: 5, reps: 8,  sets: 2, anim: 'kegel-breathe', cue: 'Try standing tonight' },
+        { name: 'Reverse Kegels',  holdSec: 5, restSec: 5, reps: 6,  sets: 1, anim: 'kegel-reverse', cue: 'Gentle outward expansion' },
+      ]
+    }
+  },
+  // ── Week 5: Endurance — ~10 min ───────────────────────────────────────
+  {
+    week: 5, label: 'Week 5 · Endurance',
+    description: '8-second holds. Pulse Hold introduced — squeeze + micro-pulses at the top.',
+    sessions: {
+      morning: [
+        { name: 'Long Hold',       holdSec: 8, restSec: 7, reps: 10, sets: 3, anim: 'kegel-breathe', cue: 'Standing — max challenge' },
+        { name: 'Pulse Hold',      holdSec: 6, restSec: 5, reps: 8,  sets: 2, anim: 'kegel-pulse',   cue: 'Hold 75% → pulse 5× at top' },
+        { name: 'Quick Flicks',    holdSec: 1, restSec: 1, reps: 20, sets: 2, anim: 'kegel-flick',   cue: 'Max speed' },
+      ],
+      evening: [
+        { name: 'Long Hold',       holdSec: 8, restSec: 7, reps: 10, sets: 2, anim: 'kegel-breathe', cue: 'Breathe — don\'t hold breath' },
+        { name: 'Elevator Kegels', holdSec: 4, restSec: 4, reps: 8,  sets: 2, anim: 'kegel-elevator',cue: 'Full 4-floor sequence' },
         { name: 'Reverse Kegels',  holdSec: 8, restSec: 5, reps: 8,  sets: 2, anim: 'kegel-reverse', cue: 'Conscious lengthening' },
       ]
     }
   },
-  // ── Week 7+: ~12 min sessions ─────────────────────────────────────────
+  // ── Week 6: Power — ~11 min ───────────────────────────────────────────
   {
-    week: 7, label: 'Week 7+ · Integration',
-    description: '10-second holds. Functional Kegels daily.',
+    week: 6, label: 'Week 6 · Power',
+    description: 'Wave Hold introduced — slow ramp up, hold at peak, slow release down.',
     sessions: {
       morning: [
-        { name: 'Long Hold',       holdSec: 10, restSec: 10, reps: 10, sets: 3, anim: 'kegel-breathe', cue: 'Standing — max challenge' },
-        { name: 'Quick Flicks',    holdSec: 1,  restSec: 1,  reps: 20, sets: 2, anim: 'kegel-flick',   cue: 'Stay relaxed between flicks' },
-        { name: 'Elevator Kegels', holdSec: 3,  restSec: 3,  reps: 8,  sets: 2, anim: 'kegel-elevator',cue: 'Smooth floors, no jumping' },
+        { name: 'Wave Hold',       holdSec: 10, restSec: 8, reps: 8,  sets: 3, anim: 'kegel-wave',    cue: '5s up → hold → 5s down' },
+        { name: 'Quick Flicks',    holdSec: 1,  restSec: 1, reps: 25, sets: 2, anim: 'kegel-flick',   cue: 'Max speed, full release' },
+        { name: 'Elevator Kegels', holdSec: 4,  restSec: 4, reps: 8,  sets: 2, anim: 'kegel-elevator',cue: 'Smooth — no jumping floors' },
+      ],
+      evening: [
+        { name: 'Long Hold',       holdSec: 8,  restSec: 7, reps: 10, sets: 2, anim: 'kegel-breathe', cue: 'Standing position' },
+        { name: 'Pulse Hold',      holdSec: 6,  restSec: 5, reps: 8,  sets: 2, anim: 'kegel-pulse',   cue: '5 pulses at peak — feel it burn' },
+        { name: 'Reverse Kegels',  holdSec: 8,  restSec: 5, reps: 8,  sets: 2, anim: 'kegel-reverse', cue: 'Deep release, keep breathing' },
+      ]
+    }
+  },
+  // ── Week 7+: Integration — ~13 min ────────────────────────────────────
+  {
+    week: 7, label: 'Week 7+ · Integration',
+    description: '10s holds. Full toolkit — Wave, Elevator, Reverse, Pulse all combined.',
+    sessions: {
+      morning: [
+        { name: 'Wave Hold',       holdSec: 10, restSec: 8,  reps: 10, sets: 3, anim: 'kegel-wave',    cue: 'Slow ramp, peak hold, slow release' },
+        { name: 'Quick Flicks',    holdSec: 1,  restSec: 1,  reps: 25, sets: 2, anim: 'kegel-flick',   cue: 'Max speed' },
+        { name: 'Elevator Kegels', holdSec: 4,  restSec: 4,  reps: 8,  sets: 2, anim: 'kegel-elevator',cue: 'Smooth floors, no jumping' },
       ],
       evening: [
         { name: 'Long Hold',       holdSec: 10, restSec: 10, reps: 10, sets: 2, anim: 'kegel-breathe', cue: 'Full release — as important as squeeze' },
-        { name: 'Quick Flicks',    holdSec: 1,  restSec: 1,  reps: 20, sets: 2, anim: 'kegel-flick',   cue: 'Quick bursts between holds' },
+        { name: 'Pulse Hold',      holdSec: 6,  restSec: 5,  reps: 10, sets: 2, anim: 'kegel-pulse',   cue: '5 pulses at peak, total control' },
         { name: 'Reverse Kegels',  holdSec: 10, restSec: 5,  reps: 8,  sets: 1, anim: 'kegel-reverse', cue: 'Relax & lengthen down' },
-        { name: 'Elevator Kegels', holdSec: 3,  restSec: 3,  reps: 8,  sets: 1, anim: 'kegel-elevator',cue: 'Feel each floor' },
+        { name: 'Elevator Kegels', holdSec: 4,  restSec: 4,  reps: 8,  sets: 1, anim: 'kegel-elevator',cue: 'Feel each floor' },
       ]
     }
   }

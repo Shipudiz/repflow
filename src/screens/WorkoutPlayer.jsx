@@ -280,6 +280,16 @@ export default function WorkoutPlayer({ workout, onClose, onComplete }) {
             style={{
               textAlign: 'center', marginBottom: 12, position: 'relative', zIndex: 1,
             }}>
+            {current.round != null && phase === PHASE.WORK && (
+              <p style={{
+                fontFamily: "'Inter', sans-serif",
+                fontWeight: 600, fontSize: 11, color: '#8d90a2',
+                textTransform: 'uppercase', letterSpacing: '0.08em',
+                margin: '0 0 4px',
+              }}>
+                Round {current.round} / {Math.max(...exercises.map(e => e.round || 1))}
+              </p>
+            )}
             <h2 style={{
               fontFamily: "'Plus Jakarta Sans', sans-serif",
               fontWeight: 800, fontSize: 22, color: '#e5e2e1',
@@ -294,7 +304,9 @@ export default function WorkoutPlayer({ workout, onClose, onComplete }) {
                 fontWeight: 400, fontSize: 13, color: '#8d90a2',
                 margin: '6px 0 0', textTransform: 'none',
               }}>
-                Next up: {nextEx.name}
+                {nextEx.round != null && nextEx.round !== current.round
+                  ? `Round ${nextEx.round}: ${nextEx.name}`
+                  : `Next up: ${nextEx.name}`}
               </p>
             )}
           </motion.div>

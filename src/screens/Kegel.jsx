@@ -9,6 +9,8 @@ const ANIM_META = {
   'kegel-flick':    { color: '#b3c5ff', label: 'Short Flicks' },
   'kegel-elevator': { color: '#b3c5ff', label: 'Elevator' },
   'kegel-reverse':  { color: '#b3c5ff', label: 'Reverse Kegel' },
+  'kegel-pulse':    { color: '#a5f3fc', label: 'Pulse Hold' },
+  'kegel-wave':     { color: '#86efac', label: 'Wave Hold' },
 }
 
 const TUTORIALS = {
@@ -51,6 +53,26 @@ const TUTORIALS = {
       'Should feel like a gentle stretch downward — no pain.',
     ],
     warning: 'Stop if you feel pain. Consult a physiotherapist.',
+  },
+  'kegel-pulse': {
+    title: 'Pulse Hold',
+    steps: [
+      'Squeeze to about 75% of your max — not a full contraction.',
+      'Hold there, then add 5 quick mini-pulses without releasing fully.',
+      'After the pulses, hold steady again until the timer ends.',
+      'Fully release. This trains both endurance and power together.',
+    ],
+    warning: 'Keep breathing throughout — no breath-holding.',
+  },
+  'kegel-wave': {
+    title: 'Wave Hold',
+    steps: [
+      'Start with zero tension. Over 5 seconds, slowly ramp up to 100%.',
+      'Hold at full contraction for the middle portion of the timer.',
+      'Over the last 5 seconds, slowly release back to zero.',
+      'Full release at the end — the wave should feel smooth, not stepped.',
+    ],
+    warning: 'Never rush the ramp. Smooth wave = better muscle control.',
   },
 }
 
@@ -827,7 +849,14 @@ export default function KagelSessionOverlay({ session, week, onClose, onComplete
                   fontFamily: plusJakarta, fontWeight: 400, fontSize: 14,
                   color: 'rgba(255,255,255,0.7)', textAlign: 'center', margin: 0,
                 }}>
-                {drillState.isSqueeze ? 'Breathe out' : 'Breathe in, full release'}
+                {drillState.isSqueeze
+                  ? (currentEx?.anim === 'kegel-wave' ? 'Ramp up slowly'
+                    : currentEx?.anim === 'kegel-pulse' ? 'Hold + 5 pulses at top'
+                    : currentEx?.anim === 'kegel-reverse' ? 'Gently expand outward'
+                    : 'Breathe out')
+                  : (currentEx?.anim === 'kegel-wave' ? 'Ramp down slowly to zero'
+                    : 'Breathe in, full release')
+                }
               </motion.p>
             </AnimatePresence>
           </div>
