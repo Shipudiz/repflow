@@ -123,7 +123,7 @@ export const WORKOUTS = [
   // ─── WORKOUT 5: Daily Routine — mixed 30s / 60s ────────────────────────────
   {
     id: 'daily-routine',
-    title: '#5 Daily Routine',
+    title: '#6 Daily Routine',
     subtitle: 'Mobility & flow · no rest',
     emoji: '🌅',
     thumb: '/workouts/daily-routine-thumb.png',
@@ -156,7 +156,7 @@ export const WORKOUTS = [
   // ─── WORKOUT 4: 12 Steps Short Workout — 30s work / 10s rest ──────────────
   {
     id: 'twelve-steps',
-    title: '#6 12 Steps',
+    title: '#7 12 Steps',
     subtitle: '30 sec work · 10 sec rest',
     emoji: '⚡',
     thumb: '/workouts/twelve-steps-thumb.png',
@@ -182,10 +182,33 @@ export const WORKOUTS = [
     ]
   },
 
+  // ─── WORKOUT 5b: Abs 20/10 — 3 min ───────────────────────────────────────────
+  {
+    id: 'abs-20-10',
+    title: '#5 Abs 20/10',
+    subtitle: '20 sec work · 10 sec rest',
+    emoji: '⚡',
+    thumb: '/workouts/abs-20-10/01-Crunches.gif',
+    color: '#f97316',
+    glow: 'rgba(249,115,22,0.3)',
+    workSec: 20,
+    restSec: 10,
+    category: 'abs',
+    type: 'timed',
+    exercises: [
+      { id: 'abs20-crunches',       gif: '/workouts/abs-20-10/01-Crunches.gif',        name: 'Crunches',        anim: 'crunch',         cue: 'Chin up, exhale on lift' },
+      { id: 'abs20-toe-touches',    gif: '/workouts/abs-20-10/02-Toe touches.gif',      name: 'Toe Touches',     anim: 'toe-touch',      cue: 'Reach straight up, keep legs vertical' },
+      { id: 'abs20-knee-tuck',      gif: '/workouts/abs-20-10/03-knee tuck.gif',        name: 'Knee Tuck',       anim: 'extend-tuck',    cue: 'Pull knees to chest, extend fully' },
+      { id: 'abs20-extend-tuck',    gif: '/workouts/abs-20-10/04-Extend to tuck.gif',   name: 'Extend to Tuck',  anim: 'extend-tuck',    cue: 'Full extension, pull in tight' },
+      { id: 'abs20-reverse-crunch', gif: '/workouts/abs-20-10/05-Reverse Crunches.gif', name: 'Reverse Crunches',anim: 'reverse-crunch', cue: 'Lift hips, not just legs' },
+      { id: 'abs20-flutter-kicks',  gif: '/workouts/abs-20-10/06-Flutter Kicks.gif',    name: 'Flutter Kicks',   anim: 'flutter',        cue: 'Keep lower back flat' },
+    ]
+  },
+
   // ─── WORKOUT 7: Kettlebell — 15 min ─────────────────────────────────────────
   {
     id: 'kettlebell-15',
-    title: '#7 Kettlebell',
+    title: '#8 Kettlebell',
     subtitle: '30 sec work · 30 sec rest · 3 rounds',
     emoji: '🏋️',
     thumb: '/workouts/kettlebell/01-swing squat.gif',
@@ -223,7 +246,7 @@ export const WORKOUTS = [
   // ─── WORKOUT 8: Full Body — 20 min ──────────────────────────────────────────
   {
     id: 'full-body-1',
-    title: '#8 Full Body',
+    title: '#9 Full Body',
     subtitle: '60/30 & 30/30 mix · 20 min',
     emoji: '💥',
     thumb: '/workouts/full-body-1-thumb.png',
